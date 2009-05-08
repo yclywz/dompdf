@@ -62,6 +62,13 @@ array (
     'italic' => DOMPDF_FONT_DIR . 'Courier-BoldOblique',
     'bold_italic' => DOMPDF_FONT_DIR . 'Courier-BoldOblique',
   ),
+  'symbol' =>
+  array (
+    'normal' => DOMPDF_FONT_DIR . 'Symbol',
+    'bold' => DOMPDF_FONT_DIR . 'Symbol',
+    'italic' => DOMPDF_FONT_DIR . 'Symbol',
+    'bold_italic' => DOMPDF_FONT_DIR . 'Symbol',   
+  ),
 //  'arial' => 
 //  array (
 //    'normal' => DOMPDF_FONT_DIR . 'Arial',

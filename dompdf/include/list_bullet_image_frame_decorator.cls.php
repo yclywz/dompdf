@@ -35,9 +35,14 @@
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
  * @package dompdf
  * @version 0.5.1
+ *
+ * Changes
+ * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @version 0.5.1.htischer.20090507
+ * - added comment
  */
 
-/* $Id: list_bullet_image_frame_decorator.cls.php,v 1.4 2006-07-07 21:31:03 benjcarson Exp $ */
+/* $Id: list_bullet_image_frame_decorator.cls.php,v 1.4 2006/07/07 21:31:03 benjcarson Exp $ */
 
 /**
  * Decorates frames for list bullets with custom images
@@ -49,7 +54,7 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
 
   /**
    * The underlying image frame
-   * 
+   *
    * @var Image_Frame_Decorator
    */
   protected $_img;
@@ -60,7 +65,7 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
    * @var int
    */
   protected $_width;
-  
+
   /**
    * The image's height in pixels
    *
@@ -82,9 +87,11 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
     list($width, $height) = getimagesize($this->_img->get_image_url());
 
     // Resample the bullet image to be consistent with 'auto' sized images
-    $this->_width = ((float)rtrim($width, "px")) * 72 / DOMPDF_DPI;
-    $this->_height = ((float)rtrim($height, "px")) * 72 / DOMPDF_DPI;
-    
+    // See also Image_Frame_Reflower::get_min_max_width
+    // Tested php ver: value measured in px, suffix "px" not in value: rtrim unnecessary.
+    $this->_width = (((float)rtrim($width, "px")) * 72) / DOMPDF_DPI;
+    $this->_height = (((float)rtrim($height, "px")) * 72) / DOMPDF_DPI;
+
   }
 
   /**
@@ -104,7 +111,7 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
   function get_height() {
     return $this->_height;
   }
-  
+
   /**
    * Override get_margin_width()
    *
@@ -140,7 +147,7 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
   function get_image_ext() {
     return $this->_img->get_image_ext();
   }
-  
+
 }
 
 ?>

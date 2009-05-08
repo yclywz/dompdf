@@ -35,16 +35,28 @@
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
  * @package dompdf
  * @version 0.5.1
+ *
+ * Changes
+ * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @version 0.5.1.htischer.20090507
+ * - Allow overriding of configuration settings by calling php script.
+ *   This allows replacing of dompdf by a new version in an application
+ *   without any modification,
+ * - Optionally separate font cache folder from font folder.
+ *   This allows write protecting the entire installation
+ * - Add settings to enable/disable additional debug output categories
+ * - Change some defaults to more practical values
+ * - Add comments about configuration parameter implications
  */
 
-/* $Id: dompdf_config.inc.php,v 1.30 2009-04-29 04:11:35 benjcarson Exp $ */
+/* $Id: dompdf_config.inc.php,v 1.19 2006/07/07 21:31:02 benjcarson Exp $ */
 
-//error_reporting(E_STRICT | E_ALL);
+error_reporting(E_STRICT | E_ALL);
 
 /**
  * The root of your DOMPDF installation
  */
-define("DOMPDF_DIR", str_replace(DIRECTORY_SEPARATOR, '/', realpath(dirname(__FILE__))));
+define("DOMPDF_DIR", realpath(dirname(__FILE__)));
 
 /**
  * The location of the DOMPDF include directory
@@ -59,10 +71,55 @@ define("DOMPDF_LIB_DIR", DOMPDF_DIR . "/lib");
 /**
  * The location of the DOMPDF font directory
  *
- * Note this directory must be writable by the webserver process (or user
- * executing DOMPDF from the CLI).  *Please note the trailing slash.*
+ * Additional .afm font metrics can be added by executing load_font.php from command line.
+ * In that case the folder must be writeable.
+ * Converting ttf fonts to afm requires an external tool referenced in the define _TTF2AFM
+ *
+ * Note that only the original "Base 14 fonts" are required to being present on
+ * all pdf viewers.
+ * Additional fonts must be embedded in the pdf file, which increases file size (not supported here)
+ * and might cause copyright problems, or might not be displayed correctly
+ * when missing on the target system.
+ *
+ * Any font specification in the source file is translated to the closest font in this folder
+ *
+ * The pdf standard "Base 14 fonts" are:
+ * Courier, Courier-Bold, Courier-BoldOblique, Courier-Oblique,
+ * Helvetica, Helvetica-Bold, Helvetica-BoldOblique, Helvetica-Oblique,
+ * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic,
+ * Symbol,
+ * ZapfDingbats,
+ * See mustRead.html:
+ * This file and the 14 PostScript(R) AFM files it
+ * accompanies may be used, copied, and
+ * distributed for any purpose and without charge,
+ * with or without modification, provided that all
+ * copyright notices are retained; that the AFM files
+ * are not distributed without this file; that all
+ * modifications to this file or any of the AFM files
+ * are prominently noted in the modified file(s); and
+ * that this paragraph is not modified. Adobe
+ * Systems has no responsibility or obligation to
+ * support the use of the AFM files.
+ *
+ * *Please note the trailing slash.*
  */
 define("DOMPDF_FONT_DIR", DOMPDF_DIR . "/lib/fonts/");
+
+/**
+ * The location of the DOMPDF font cache directory
+ *
+ * Note this directory must be writable by the webserver process
+ * This folder must already exist!
+ * It contains the .afm files, on demand parsed, converted to php syntax and cached
+ * This folder can be the same as DOMPDF_FONT_DIR
+ *
+ * *Please note the trailing slash.*
+ */
+
+if (!defined("DOMPDF_FONT_CACHE")) {
+  define("DOMPDF_FONT_CACHE", DOMPDF_FONT_DIR);
+}
 
 /**
  * The location of the system's temporary directory.
@@ -70,57 +127,30 @@ define("DOMPDF_FONT_DIR", DOMPDF_DIR . "/lib/fonts/");
  * This directory must be writeable by the webserver process.
  * It is used to download remote images.
  */
-define("DOMPDF_TEMP_DIR", "/tmp");
-
-/**
- * ==== IMPORTANT ====
- *
- * dompdf's "chroot": Prevents dompdf from accessing system files or other
- * files on the webserver.  All local files opened by dompdf must be in a
- * subdirectory of this directory.  DO NOT set it to '/' since this could
- * allow an attacker to use dompdf to read any files on the server.  This
- * should be an absolute path.
- */
-define("DOMPDF_CHROOT", realpath(DOMPDF_DIR));
-
-/**
- * Whether to use Unicode fonts or not.
- *
- * When set to true the PDF backend must be set to "CPDF" and fonts must be
- * loaded via the modified ttf2ufm tool included with dompdf (see below).
- * Unicode font metric files (with .ufm extensions) must be created with
- * ttf2ufm.  load_font.php should do this for you if the TTF2AFM define below
- * points to the modified ttf2ufm tool included with dompdf.
- *
- * When enabled, dompdf can support all Unicode glyphs.  Any glyphs used in a
- * document must be present in your fonts, however.
- *
- */
-define("DOMPDF_UNICODE_ENABLED", false);
+if (!defined('DOMPDF_TEMP_DIR')) {
+  define("DOMPDF_TEMP_DIR", "/tmp");
+}
 
 /**
  * The path to the tt2pt1 utility (used to convert ttf to afm)
  *
- * Not strictly necessary, but useful if you would like to install 
+ * Not strictly necessary, but useful if you would like to install
  * additional fonts using the {@link load_font.php} utility.
- *
- * Windows users should use something like this:
- * define("TTF2AFM", "C:\\Program Files\\Ttf2Pt1\\bin\\ttf2pt1.exe");
  *
  * @link http://ttf2pt1.sourceforge.net/
  */
-define("TTF2AFM", DOMPDF_LIB_DIR ."/ttf2ufm/ttf2ufm-src/ttf2pt1");
-//define("TTF2AFM", "/usr/bin/ttf2pt1");
-
+if (!defined("TTF2AFM")) {
+  define("TTF2AFM", "/usr/bin/ttf2pt1");
+}
 
 /**
  * The PDF rendering backend to use
  *
- * Valid settings are 'PDFLib', 'CPDF' (the bundled R&OS PDF class), 'GD' and
- * 'auto'.  'auto' will look for PDFLib and use it if found, or if not it will
- * fall back on CPDF.  'GD' renders PDFs to graphic files.  {@link
- * Canvas_Factory} ultimately determines which rendering class to instantiate
- * based on this setting.
+ * Valid settings are 'pdflib', 'cpdf' (the bundled R&OS PDF class),
+ * 'gd' and 'auto'.  'auto' will look for PDFLib and use it if found,
+ * or if not it will fall back on CPDF.  'GD' renders PDFs to graphic
+ * files.  {@link Canvas_Factory} ultimately determines which
+ * rendering class to instantiate based on this setting.
  *
  * Both PDFLib & CPDF rendering backends provide sufficient rendering
  * capabilities for dompdf, however additional features (e.g. object,
@@ -136,12 +166,18 @@ define("TTF2AFM", DOMPDF_LIB_DIR ."/ttf2ufm/ttf2ufm-src/ttf2pt1");
  * multiple pages are not supported, nor are PDF 'objects'.  Have a
  * look at {@link GD_Adapter} for more information.  GD support is new
  * and experimental, so use it at your own risk.
- * 
+ *
  * @link http://www.pdflib.com
  * @link http://www.ros.co.nz/pdf
  * @link http://www.php.net/image
+ *
+ * Maybe 'auto' selects the fastest, but explicite setting makes result
+ * predictable. cpdf works out of the box, because no license key for
+ * external tool needed.
  */
-define("DOMPDF_PDF_BACKEND", "pdflib");
+if (!defined("DOMPDF_PDF_BACKEND")) {
+  define("DOMPDF_PDF_BACKEND", "cpdf");
+}
 
 /**
  * PDFlib license key
@@ -151,41 +187,66 @@ define("DOMPDF_PDF_BACKEND", "pdflib");
  * the commercial version of PDFlib, comment out this setting.
  *
  * @link http://www.pdflib.com
+ *
+ * If pdflib present in web server and auto or selected explicitely above,
+ * a real license code must exist!
  */
-#define("DOMPDF_PDFLIB_LICENSE", "your license key here");
+if (!defined("DOMPDF_PDFLIB_LICENSE")) {
+  //define("DOMPDF_PDFLIB_LICENSE", "your license key here");
+}
 
 /**
  * The default paper size.
  *
- * If you live outside of North America, feel free to change this ;)
+ * North America "letter", others mostly "a4".
+ * optionally override in caller of this script.
  *
  * @see CPDF_Adapter::PAPER_SIZES for valid sizes
  */
-define("DOMPDF_DEFAULT_PAPER_SIZE", "letter");
+if (!defined("DOMPDF_DEFAULT_PAPER_SIZE")) {
+  define("DOMPDF_DEFAULT_PAPER_SIZE", "a4");
+}
 
 
 /**
  * The default font family
  *
- * Used if no suitable fonts can be found
+ * Used if no suitable fonts can be found. This must(!) exist in the font folder.
  * @var string
  */
-define("DOMPDF_DEFAULT_FONT", "serif");
+if (!defined("DOMPDF_DEFAULT_FONT")) {
+  define("DOMPDF_DEFAULT_FONT", "serif");
+}
 
 /**
- * Image DPI setting
+ * px per inch (DPI)
+ * This affects fonts and images and background patterns.
+ * If a size in html is given as px (or without unit as image size),
+ * this tells the corresponding size in pt.
+ * This adjusts the relative sizes to be similar to the rendering of the
+ * html page in a reference browser.
  *
- * This setting determines the default DPI setting for images.  The
- * DPI may be overridden for inline images by explictly setting the
- * image's width & height style attributes (i.e. if the image's native
- * width is 600 pixels and you specify the image's width as 72 points,
- * the image will have a DPI of 600 in the rendered PDF.  The DPI of
- * background images can not be overridden and is controlled entirely
- * via this parameter.
+ * In pdf, always 1 pt = 1/72 inch
  *
- * @var int
+ * Rendering resolution of various browsers in px per inch:
+ * Windows Firefox and Internet Explorer:
+ *   SystemControl->Display properties->FontResolution: Default:96, largefonts:120, custom:?
+ * Linux Firefox:
+ *   about:config *resolution: Default:96
+ *   (xorg screen dimension in mm and Desktop font dpi settings are ignored)
+ *
+ * Take care about extra font/image zoom factor of browser.
+ *
+ * In images, <img> size in pixel attribute, img css style, are overriding
+ * the real image dimension in px for rendering.
+ *
+ * define("DOMPDF_DPI", "72");
+ * define("DOMPDF_DPI", "96");
+ * define("DOMPDF_DPI", "120");
  */
-define("DOMPDF_DPI", "150");
+if (!defined("DOMPDF_DPI")) {
+  define("DOMPDF_DPI", "96");
+}
 
 /**
  * Enable inline PHP
@@ -199,8 +260,9 @@ define("DOMPDF_DPI", "150");
  *
  * @var bool
  */
-define("DOMPDF_ENABLE_PHP", true);
-
+if (!defined("DOMPDF_ENABLE_PHP")) {
+  define("DOMPDF_ENABLE_PHP", true);
+}
 
 /**
  * Enable remote file access
@@ -208,32 +270,26 @@ define("DOMPDF_ENABLE_PHP", true);
  * If this setting is set to true, DOMPDF will access remote sites for
  * images and CSS files as required.
  *
- * @var bool 
+ * @var bool
  */
-define("DOMPDF_ENABLE_REMOTE", false);
- 
+if (!defined("DOMPDF_ENABLE_REMOTE")) {
+  define("DOMPDF_ENABLE_REMOTE", true);
+}
+
 /**
  * DOMPDF autoload function
  *
  * If you have an existing autoload function, add a call to this function
  * from your existing __autoload() implementation.
  *
- * TODO: use spl_autoload(), if available
- *
  * @param string $class
  */
 function DOMPDF_autoload($class) {
-  $filename = DOMPDF_INC_DIR . "/" . mb_strtolower($class) . ".cls.php";
-  
-  if ( is_file($filename) )
-    require_once($filename);
+  $filename = mb_strtolower($class) . ".cls.php";
+  require_once(DOMPDF_INC_DIR . "/$filename");
 }
 
-if ( function_exists("spl_autoload_register") ) {
-
-   spl_autoload_register("DOMPDF_autoload");
-
-} else if ( !function_exists("__autoload") ) {
+if ( !function_exists("__autoload") ) {
   /**
    * Default __autoload() function
    *
@@ -242,7 +298,7 @@ if ( function_exists("spl_autoload_register") ) {
   function __autoload($class) {
     DOMPDF_autoload($class);
   }
-} 
+}
 
 // ### End of user-configurable options ###
 
@@ -263,18 +319,26 @@ $_dompdf_warnings = array();
 $_dompdf_show_warnings = false;
 
 /**
- * If true, the entire tree is dumped to stdout in dompdf.cls.php 
+ * If true, the entire tree is dumped to stdout in dompdf.cls.php
  *
  * @var bool
  */
 $_dompdf_debug = false;
 
-/**
- * Array of enabled debug message types
- *
- * @var array
+/* Optionally enable different classes of debug output before the pdf content.
+ * Visible if displaying pdf as text,
+ * E.g. on repeated display of same pdf in browser when pdf is not taken out of
+ * the browser cache and the premature output prevents setting of the mime type.
  */
-$_DOMPDF_DEBUG_TYPES = array(); //array("page-break" => 1);
+if (!defined('DEBUGPNG')) {
+  define('DEBUGPNG',0);
+}
+if (!defined('DEBUGKEEPTEMP')) {
+  define('DEBUGKEEPTEMP',0);
+}
+if (!defined('DEBUGCSS')) {
+  define('DEBUGCSS',0);
+}
 
 require_once(DOMPDF_INC_DIR . "/functions.inc.php");
 

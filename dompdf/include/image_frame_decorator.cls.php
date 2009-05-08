@@ -35,9 +35,14 @@
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
  * @package dompdf
  * @version 0.5.1
+ *
+ * Changes
+ * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @version 0.5.1.htischer.20090507
+ * - add optional debug output
  */
 
-/* $Id: image_frame_decorator.cls.php,v 1.12 2006-08-02 18:44:25 benjcarson Exp $ */
+/* $Id: image_frame_decorator.cls.php,v 1.11 2006/07/07 21:31:03 benjcarson Exp $ */
 
 /**
  * Decorates frames for image layout and rendering
@@ -54,7 +59,7 @@ class Image_Frame_Decorator extends Frame_Decorator {
    * @var array
    */
   static protected $_cache = array();
- 
+
   /**
    * The path to the image file (note that remote images are
    * downloaded locally to DOMPDF_TEMP_DIR).
@@ -78,15 +83,17 @@ class Image_Frame_Decorator extends Frame_Decorator {
    */
   function __construct(Frame $frame, DOMPDF $dompdf) {
     global $_dompdf_warnings;
-    
+
     parent::__construct($frame, $dompdf);
     $url = $frame->get_node()->getAttribute("src");
-      
+//debugpng
+if (DEBUGPNG) print '[__construct '.$url.']';
+
     list($this->_image_url, $this->_image_ext) = Image_Cache::resolve_url($url,
                                                                           $dompdf->get_protocol(),
                                                                           $dompdf->get_host(),
                                                                           $dompdf->get_base_path());
-    
+
   }
 
   /**
@@ -106,7 +113,7 @@ class Image_Frame_Decorator extends Frame_Decorator {
   function get_image_ext() {
     return $this->_image_ext;
   }
-  
+
   /**
    * Unlink all cached images (i.e. temporary images either downloaded
    * or converted)
@@ -114,6 +121,9 @@ class Image_Frame_Decorator extends Frame_Decorator {
   static function clear_image_cache() {
     if ( count(self::$_cache) ) {
       foreach (self::$_cache as $file)
+//debugpng
+if (DEBUGPNG) print '[clear_image_cache unlink '.$file.']';
+if (!DEBUGKEEPTEMP)
         unlink($file);
     }
   }
