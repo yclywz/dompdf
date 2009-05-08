@@ -1,4 +1,3 @@
-
 = Selectors =
 
 dompdf supports the following CSS 2.1 selector syntaxes. dompdf also supports elements with multiple class attributes (e.g. `<p class="red bold">foo</p>` matches p.red and p.bold).
@@ -97,7 +96,7 @@ dompdf supports the majority of CSS 2.1 properties. Some notable properties are 
 ||text-align 	||yes||
 ||text-decoration ||	yes||
 ||text-indent 	||yes||
-||text-transform 	||yes||
+||text-transform 	||no||
 ||top ||	no||
 ||unicode-bidi ||	no||
 ||vertical-align|| 	yes||
