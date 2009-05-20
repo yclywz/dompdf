@@ -35,9 +35,16 @@
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
  * @package dompdf
  * @version 0.5.1
+ *
+ * Changes
+ * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @version 0.5.1.htischer.20090507
+ * - trailing slash of base_path in build_url is no longer optional when
+ *   required. This allows paths not ending in a slash, e.g. on dynamically
+ *   created sites with page id in the url parameters.
  */
 
-/* $Id: functions.inc.php,v 1.17 2007-08-22 23:02:07 benjcarson Exp $ */
+/* $Id: functions.inc.php,v 1.11 2006-07-07 21:31:03 benjcarson Exp $ */
 
 /**
  * print_r wrapper for html/cli output
@@ -94,10 +101,20 @@ function pre_var_dump($mixed) {
  * @param string $base_path
  * @param string $url
  * @return string
+ *
+ * Initially the trailing slash of $base_path was optional, and conditionally appended.
+ * However on dynamically created sites, where the page is given as url parameter,
+ * the base path might not end with an url.
+ * Therefore do not append a slash, and **require** the $base_url to ending in a slash
+ * when needed.
+ * Vice versa, on using the local file system path of a file, make sure that the slash
+ * is appended (o.k. also for Windows)
  */
 function build_url($protocol, $host, $base_path, $url) {
-  if ( mb_strlen($url) == 0 )
-    return $protocol . $host . rtrim($base_path, "/\\") . "/";
+  if ( mb_strlen($url) == 0 ) {
+    //return $protocol . $host . rtrim($base_path, "/\\") . "/";
+    return $protocol . $host . $base_path;
+  }
 
   // Is the url already fully qualified?
   if ( mb_strpos($url, "://") !== false )
@@ -105,21 +122,24 @@ function build_url($protocol, $host, $base_path, $url) {
 
   $ret = $protocol;
 
-  if ( !in_array(mb_strtolower($protocol), array("http://", "https://",
-                                                 "ftp://", "ftps://")) ) {
-    // We ignore the host for local file access, and run the path through
-    // realpath()
-    $host = "";
-    $base_path = dompdf_realpath($base_path);
+  if (!in_array(mb_strtolower($protocol), array("http://", "https://", "ftp://", "ftps://"))) {
+    //On Windows local file, an abs path can begin also with a '\' or a drive letter
+    if ($url{0} !== '/' && (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' || $url{0} == '\\' || $url{1} !== ':' || ($url{2}!=='\\' && $url{2}!=='/'))) {
+      // We ignore the host for local file access, and run the path through
+      // realpath()
+      $ret .= realpath($base_path).'/';
+    }
+    $ret .= $url; 
+    return $ret;
   }
 
-  if ( $url{0} === "/" )
+  if ( $url{0} === '/' ) {
     // Absolute path
     $ret .= $host . $url;
-  else {
+  } else {
     // Relative path
 
-    $base_path = $base_path !== "" ? rtrim($base_path, "/\\") . "/" : "";
+    //$base_path = $base_path !== "" ? rtrim($base_path, "/\\") . "/" : "";
     $ret .= $host . $base_path . $url;
   }
 
@@ -275,46 +295,6 @@ function dec2roman($num) {
 function is_percent($value) { return false !== mb_strpos($value, "%"); }
 
 /**
- * Canonicalize a path without checking if the file exists
- *
- * @param  string $path The path to canonicalize
- * @return string The canonical path, or null if the path is invalid (e.g. /../../foo)
- */
-function dompdf_realpath($path) {
-
-  // If the path is relative, prepend the current directory
-  if ( $path{0} != "/" )
-    $path = getcwd() . "/" . $path;
-
-  $parts = explode("/", $path);
-  $path = array();
-
-  $i = 0;
-  foreach ($parts as $dir) {
-
-    if ( $dir == "." )
-      continue;
-
-    if ( $dir == ".." ) {
-      $i--;
-      if ( $i < 0 )
-        $i = 0;
-
-      unset($path[$i]);
-      continue;
-    }
-
-    if ( $dir == "" )
-      continue;
-
-    $path[$i] = $dir;
-    $i++;
-  }
-
-  return "/" . join("/", $path);
-}
-
-/**
  * mb_string compatibility
  */
 
@@ -394,50 +374,8 @@ function record_warnings($errno, $errstr, $errfile, $errline) {
 }
 
 /**
- * Print a useful backtrace
- */
-function bt() {
-  $bt = debug_backtrace();
-
-  array_shift($bt); // remove actual bt() call
-  echo "\n";
-
-  $i = 0;
-  foreach ($bt as $call) {
-    $file = basename($call["file"]) . " (" . $call["line"] . ")";
-    if ( isset($call["class"]) ) {
-      $func = $call["class"] . "->" . $call["function"] . "()";
-    } else {
-      $func = $call["function"] . "()";
-    }
-
-    echo "#" . str_pad($i, 2, " ", STR_PAD_RIGHT) . ": " . str_pad($file.":", 42) . " $func\n";
-    $i++;
-  }
-  echo "\n";
-}
-
-/**
- * Print debug messages
- *
- * @param string $type  The type of debug messages to print
- */
-function dompdf_debug($type, $msg) {
-  global $_DOMPDF_DEBUG_TYPES;
-  global $_dompdf_show_warnings;
-  global $_dompdf_debug;
-  if ( isset($_DOMPDF_DEBUG_TYPES[$type]) && ($_dompdf_show_warnings || $_dompdf_debug) ) {
-    $arr = debug_backtrace();
-
-    echo basename($arr[0]["file"]) . " (" . $arr[0]["line"] ."): " . $arr[1]["function"] . ": ";
-    pre_r($msg);
-  }
-}
-
-/**
  * Dump memory usage
  */
-if ( !function_exists("print_memusage") ) {
 function print_memusage() {
   global $memusage;
   echo ("Memory Usage\n");
@@ -454,30 +392,26 @@ function print_memusage() {
 
   echo ("\n" . str_pad("Total:", 40) . memory_get_usage()) . "\n";
 }
-}
 
 /**
  * Initialize memory profiling code
  */
-if ( !function_exists("enable_mem_profile") ) {
 function enable_mem_profile() {
     global $memusage;
     $memusage = array("Startup" => memory_get_usage());
     register_shutdown_function("print_memusage");
-}
-}
+  }
 
 /**
  * Record the current memory usage
  *
  * @param string $location a meaningful location
  */
-if ( !function_exists("mark_memusage") ) {
 function mark_memusage($location) {
   global $memusage;
   if ( isset($memusage) )
     $memusage[$location] = memory_get_usage();
 }
-}
+
 
 ?>

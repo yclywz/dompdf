@@ -37,7 +37,7 @@
  * @version 0.5.1
  */
 
-/* $Id: php_evaluator.cls.php,v 1.5 2008-02-07 07:31:05 benjcarson Exp $ */
+/* $Id: php_evaluator.cls.php,v 1.4 2006-07-07 21:31:04 benjcarson Exp $ */
 
 /**
  * Executes inline PHP code during the rendering process
@@ -53,19 +53,15 @@ class PHP_Evaluator {
     $this->_canvas = $canvas;
   }
 
-  function evaluate($code, $vars = array()) {
+  function evaluate($code) {
+
     if ( !DOMPDF_ENABLE_PHP )
       return;
     
     // Set up some variables for the inline code
     $pdf = $this->_canvas;
-    $PAGE_NUM = $pdf->get_page_number();
-    $PAGE_COUNT = $pdf->get_page_count();
-    
-    // Override those variables if passed in
-    foreach ($vars as $k => $v) {
-        $$k = $v;
-    }
+    $PAGE_NUM = $this->_canvas->get_page_number();
+    $PAGE_COUNT = $this->_canvas->get_page_count();
 
     eval(utf8_decode($code)); 
   }

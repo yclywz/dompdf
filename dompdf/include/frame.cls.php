@@ -37,7 +37,7 @@
  * @version 0.5.1
  */
 
-/* $Id: frame.cls.php,v 1.15 2008-02-15 02:09:10 benjcarson Exp $ */
+/* $Id: frame.cls.php,v 1.11 2006-07-07 21:31:03 benjcarson Exp $ */
 
 /**
  * The main Frame class
@@ -68,11 +68,6 @@ class Frame {
    */
   protected $_id;
 
-  /**
-   * Unique id counter
-   */
-  static protected $ID_COUNTER = 0;
-  
   /**
    * This frame's calculated style
    *
@@ -171,7 +166,7 @@ class Frame {
 
     $this->_decorator = null;
 
-    $this->set_id( self::$ID_COUNTER++ );
+    $this->set_id( uniqid(rand()) );
   }
 
   /**
@@ -292,8 +287,8 @@ class Frame {
   function get_padding_box() {
     $x = $this->_position["x"] +
       $this->_style->length_in_pt(array($this->_style->margin_left,
-                                        $this->_style->border_left_width),
-                                  $this->_containing_block["w"]);
+                                $this->_style->border_left_width),
+                          $this->_containing_block["w"]);
     $y = $this->_position["y"] +
       $this->_style->length_in_pt(array($this->_style->margin_top,
                                 $this->_style->border_top_width),
@@ -370,11 +365,8 @@ class Frame {
   }
   
   function set_containing_block($x = null, $y = null, $w = null, $h = null) {
-    if ( is_array($x) ){
-  		foreach($x AS $key => $val){
-			$$key = $val;
-		}
-    }
+    if ( is_array($x) ) 
+      extract($x);
     
     if (is_numeric($x)) {
       $this->_containing_block[0] = $x;
@@ -577,13 +569,13 @@ class Frame {
   function __toString() {
 
     // Skip empty text frames
-//     if ( $this->_node->nodeName == "#text" &&
-//          preg_replace("/\s/", "", $this->_node->data) === "" )
-//       return "";
+    if ( $this->_node->nodeName == "#text" &&
+         preg_replace("/\s/", "", $this->_node->data) === "" )
+      return "";
     
     
     $str = "<b>" . $this->_node->nodeName . ":</b><br/>";
-    //$str .= (string)$this->_node . "<br/>";
+    $str .= (string)$this->_node . "<br/>";
     $str .= "Id: " .$this->get_id() . "<br/>";
     $str .= "Class: " .get_class($this) . "<br/>";
     
@@ -626,7 +618,7 @@ class Frame {
         foreach ($line["frames"] as $frame) {
           if ($frame instanceof Text_Frame_Decorator) {
             $str .= "\ntext: ";          
-            $str .= "'". htmlspecialchars($frame->get_text()) ."'";
+            $str .= htmlspecialchars($frame->get_text());
           } else {
             $str .= "\nBlock: " . $frame->get_node()->nodeName . " (" . (string)$frame->get_node() . ")";
           }

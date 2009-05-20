@@ -37,7 +37,7 @@
  * @version 0.5.1
  */
 
-/* $Id: text_frame_decorator.cls.php,v 1.8 2008-03-12 06:35:43 benjcarson Exp $ */
+/* $Id: text_frame_decorator.cls.php,v 1.4 2006-07-07 21:31:04 benjcarson Exp $ */
 
 /**
  * Decorates Frame objects for text layout
@@ -76,15 +76,7 @@ class Text_Frame_Decorator extends Frame_Decorator {
       $this->_frame->get_node()->data = $this->_frame->get_style()->content;
       $this->_frame->get_style()->content = "normal";
     }
-
-//      pre_r("---");
-//      $style = $this->_frame->get_style();
-//      var_dump($text = $this->_frame->get_node()->data);
-//      var_dump($asc = utf8_decode($text));
-//      for ($i = 0; $i < strlen($asc); $i++)
-//        pre_r("$i: " . $asc{$i} . " - " . ord($asc{$i}));
-//      pre_r("width: " . Font_Metrics::get_text_width($text, $style->font_family, $style->font_size));
-
+    
     return $this->_frame->get_node()->data;
   }
 
@@ -105,14 +97,6 @@ class Text_Frame_Decorator extends Frame_Decorator {
     $style = $this->get_style();
     $font = $style->font_family;
     $size = $style->font_size;
-
-    /*
-    pre_r('-----');
-    pre_r($style->line_height);
-    pre_r($style->font_size);
-    pre_r(Font_Metrics::get_font_height($font, $size));
-    pre_r(($style->line_height / $size) * Font_Metrics::get_font_height($font, $size));
-    */
 
     return ($style->line_height / $size) * Font_Metrics::get_font_height($font, $size);
     
@@ -136,19 +120,6 @@ class Text_Frame_Decorator extends Frame_Decorator {
 
   //........................................................................
 
-  // Recalculate the text width
-  function recalculate_width() {
-    $style = $this->get_style();
-    $text = $this->get_text();
-    $size = $style->font_size;
-    $font = $style->font_family;
-    $word_spacing = $style->length_in_pt($style->word_spacing);
-
-    $style->width = Font_Metrics::get_text_width($text, $font, $size, $word_spacing);
-  }
-  
-  //........................................................................
-
   // Text manipulation methods
   
   // split the text in this frame at the offset specified.  The remaining
@@ -156,7 +127,7 @@ class Text_Frame_Decorator extends Frame_Decorator {
   function split_text($offset) {
     if ( $offset == 0 )
       return;
-
+    
     $split = $this->_frame->get_node()->splitText($offset);
     $deco = $this->copy($split);
 
