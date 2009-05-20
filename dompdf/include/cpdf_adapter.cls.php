@@ -38,6 +38,13 @@
  * @contributor Orion Richardson <orionr@yahoo.com>
  * @package dompdf
  * @version 0.5.1
+ *
+ * Changes
+ * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @version 0.5.1.htischer.20090507
+ * - On gif to png conversion tmp file creation, clarify tmp name and add to tmp deletion list only on success
+ * - On gif to png conversion, when available add direct from gd without tmp file, skip image load if already cached.
+ *   to safe CPU time and memory
  */
 
 /* $Id: cpdf_adapter.cls.php,v 1.22 2009-04-29 04:11:35 benjcarson Exp $ */
@@ -235,7 +242,10 @@ class CPDF_Adapter implements Canvas {
    */
   function __destruct() {
     foreach ($this->_image_cache as $img) {
-      unlink($img);
+      //debugpng
+      if (DEBUGPNG) print '[__destruct unlink '.$img.']';
+      if (!DEBUGKEEPTEMP)
+        unlink($img);
     }
   }
   
@@ -499,8 +509,10 @@ class CPDF_Adapter implements Canvas {
 
     if ( $im ) {
       imageinterlace($im, 0);
-    
-      $filename = tempnam(DOMPDF_TEMP_DIR, "dompdf_img_");
+
+      $filename = tempnam(DOMPDF_TEMP_DIR, "gifdompdf_img_").'.png';
+      $this->_image_cache[] = $filename;
+
       imagepng($im, $filename);
 
     } else {
@@ -510,8 +522,6 @@ class CPDF_Adapter implements Canvas {
 
     restore_error_handler();
 
-    $this->_image_cache[] = $filename;
-    
     return $filename;
     
   }
@@ -579,26 +589,61 @@ class CPDF_Adapter implements Canvas {
   //........................................................................
 
   function image($img_url, $img_type, $x, $y, $w, $h) {
+    //debugpng
+    if (DEBUGPNG) print '[image:'.$img_url.'|'.$img_type.']';
 
     $img_type = mb_strtolower($img_type);
-    
+
     switch ($img_type) {
     case "jpeg":
     case "jpg":
+      //debugpng
+      if (DEBUGPNG)  print '!!!jpg!!!';
+
       $this->_pdf->addJpegFromFile($img_url, $x, $this->y($y) - $h, $w, $h);
       break;
 
     case "png":
+      //debugpng
+      if (DEBUGPNG)  print '!!!png!!!';
+
       $this->_pdf->addPngFromFile($img_url, $x, $this->y($y) - $h, $w, $h);
       break;
 
     case "gif":
       // Convert gifs to pngs
-      $img_url = $this->_convert_gif_to_png($img_url);
-      $this->_pdf->addPngFromFile($img_url, $x, $this->y($y) - $h, $w, $h);
+      //DEBUG_IMG_TEMP
+      //if (0) {
+      if ( method_exists( $this->_pdf, "addImagePng" ) ) {
+        //debugpng
+        if (DEBUGPNG)  print '!!!gif addImagePng!!!';
+
+      	//If optimization to direct png creation from gd object is available,
+        //don't create temp file, but place gd object directly into the pdf
+	    if ( method_exists( $this->_pdf, "image_iscached" ) &&
+	         $this->_pdf->image_iscached($img_url) ) {
+	      //If same image has occured already before, no need to load because
+	      //duplicate will anyway be eliminated.
+	      $img = null;
+	    } else {
+    	  $img = @imagecreatefromgif($img_url);
+    	  if (!$img) {
+      	    return;
+    	  }
+    	  imageinterlace($img, 0);
+    	}
+    	$this->_pdf->addImagePng($img_url, $x, $this->y($y) - $h, $w, $h, $img);
+      } else {
+        //debugpng
+        if (DEBUGPNG)  print '!!!gif addPngFromFile!!!';
+        $img_url = $this->_convert_gif_to_png($img_url);
+        $this->_pdf->addPngFromFile($img_url, $x, $this->y($y) - $h, $w, $h);
+      }
       break;
-      
-    default:      
+
+    default:
+      //debugpng
+      if (DEBUGPNG) print '!!!unknown!!!';
       break;
     }
     

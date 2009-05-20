@@ -61,14 +61,47 @@ define("DOMPDF_LIB_DIR", DOMPDF_DIR . "/lib");
  *
  * Note this directory must be writable by the webserver process (or user
  * executing DOMPDF from the CLI).  *Please note the trailing slash.*
+ *
+ * Notes regarding fonts:
+ * Additional .afm font metrics can be added by executing load_font.php from command line.
+ * Converting ttf fonts to afm requires the external tool referenced by TTF2AFM
+ *
+ * Only the original "Base 14 fonts" are present on all pdf viewers. Additional fonts must 
+ * be embedded in the pdf file or the PDF may not display correctly. This can significantly 
+ * increase file size and could violate copyright provisions of a font. Font embedding is 
+ * not currently supported (? via HT).
+ *
+ * Any font specification in the source HTML is translated to the closest font available 
+ * in the font directory.
+ *
+ * The pdf standard "Base 14 fonts" are:
+ * Courier, Courier-Bold, Courier-BoldOblique, Courier-Oblique,
+ * Helvetica, Helvetica-Bold, Helvetica-BoldOblique, Helvetica-Oblique,
+ * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic,
+ * Symbol,
+ * ZapfDingbats,
  */
 define("DOMPDF_FONT_DIR", DOMPDF_DIR . "/lib/fonts/");
+
+/**
+ * The location of the DOMPDF font cache directory
+ *
+ * Note this directory must be writable by the webserver process
+ * This folder must already exist!
+ * It contains the .afm files, on demand parsed, converted to php syntax and cached
+ * This folder can be the same as DOMPDF_FONT_DIR
+ *
+ * *Please note the trailing slash.*
+ */
+define("DOMPDF_FONT_CACHE", DOMPDF_FONT_DIR);
 
 /**
  * The location of the system's temporary directory.
  *
  * This directory must be writeable by the webserver process.
  * It is used to download remote images.
+ * Since e.g. on Windows there is no mandatory tmp location, we should 
+ * consider using sys_get_temp_dir().
  */
 define("DOMPDF_TEMP_DIR", "/tmp");
 
@@ -141,7 +174,8 @@ define("TTF2AFM", DOMPDF_LIB_DIR ."/ttf2ufm/ttf2ufm-src/ttf2pt1");
  * @link http://www.ros.co.nz/pdf
  * @link http://www.php.net/image
  */
-define("DOMPDF_PDF_BACKEND", "pdflib");
+define("DOMPDF_PDF_BACKEND", "auto");
+
 
 /**
  * PDFlib license key
@@ -157,7 +191,7 @@ define("DOMPDF_PDF_BACKEND", "pdflib");
 /**
  * The default paper size.
  *
- * If you live outside of North America, feel free to change this ;)
+ * North America standard is "letter"; other countries generally "a4"
  *
  * @see CPDF_Adapter::PAPER_SIZES for valid sizes
  */
@@ -167,7 +201,7 @@ define("DOMPDF_DEFAULT_PAPER_SIZE", "letter");
 /**
  * The default font family
  *
- * Used if no suitable fonts can be found
+ * Used if no suitable fonts can be found. This must exist in the font folder.
  * @var string
  */
 define("DOMPDF_DEFAULT_FONT", "serif");
@@ -182,6 +216,26 @@ define("DOMPDF_DEFAULT_FONT", "serif");
  * the image will have a DPI of 600 in the rendered PDF.  The DPI of
  * background images can not be overridden and is controlled entirely
  * via this parameter.
+ *
+ * For the purposes of DOMPDF, pixels per inch (PPI) = dots per inch (DPI).
+ * If a size in html is given as px (or without unit as image size),
+ * this tells the corresponding size in pt.
+ * This adjusts the relative sizes to be similar to the rendering of the
+ * html page in a reference browser.
+ *
+ * In pdf, always 1 pt = 1/72 inch
+ *
+ * Rendering resolution of various browsers in px per inch:
+ * Windows Firefox and Internet Explorer:
+ *   SystemControl->Display properties->FontResolution: Default:96, largefonts:120, custom:?
+ * Linux Firefox:
+ *   about:config *resolution: Default:96
+ *   (xorg screen dimension in mm and Desktop font dpi settings are ignored)
+ *
+ * Take care about extra font/image zoom factor of browser.
+ *
+ * In images, <img> size in pixel attribute, img css style, are overriding
+ * the real image dimension in px for rendering.
  *
  * @var int
  */
@@ -275,6 +329,21 @@ $_dompdf_debug = false;
  * @var array
  */
 $_DOMPDF_DEBUG_TYPES = array(); //array("page-break" => 1);
+
+/* Optionally enable different classes of debug output before the pdf content.
+ * Visible if displaying pdf as text,
+ * E.g. on repeated display of same pdf in browser when pdf is not taken out of
+ * the browser cache and the premature output prevents setting of the mime type.
+ */
+if (!defined('DEBUGPNG')) {
+  define('DEBUGPNG',0);
+}
+if (!defined('DEBUGKEEPTEMP')) {
+  define('DEBUGKEEPTEMP',0);
+}
+if (!defined('DEBUGCSS')) {
+  define('DEBUGCSS',0);
+}
 
 require_once(DOMPDF_INC_DIR . "/functions.inc.php");
 

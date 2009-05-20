@@ -23,6 +23,18 @@
    * @contributor  Orion Richardson <orionr@yahoo.com>
    * @version  009
    * @package  Cpdf
+   *
+   * Changes
+   * @author Helmut Tischer <htischer@weihenstephan.org>
+   * @version 0.5.1.htischer.20090507
+   * - On multiple identical png and jpg images, put only one copy into the pdf file and refer to it.
+   *   This reduces file size and rendering time.
+   * - Allow font metrics cache to be a different folder as the font metrics. This allows a read only installation.
+   * - Allow adding images directly from a gd object. This increases performance by avoiding temporary files.
+   * - On png image files remove alpa channel to allow display of typical png files in pdf.
+   * - On addImage avoid temporary file. Todo: Duplicate Image (currently not used)
+   * - Add a check function, whether image is already cached, This avoids double creation by caller which saves
+   *   CPU time and memory.
    */
 class  Cpdf {
 
@@ -248,6 +260,11 @@ class  Cpdf {
    * note that this includes the objects array, so these can be large.
    */
   public  $checkpoint =  '';
+
+  /* Table of Image origin filenames and image labels which were already added with o_image().
+   * Allows to merge identical images
+   */
+  public  $imagelist = array();
 
   /**
    * whether the text passed in should be treated as Unicode or just local character set.
@@ -2450,17 +2467,18 @@ class  Cpdf {
 
       $name = substr($font, $pos+1);
     }
-
+    // $dir replaced by DOMPDF_FONT_CACHE in HT's mods
+    // BS: Was this done thoroughly? I see some places where $dir is still used
     $this->addMessage('openFont: '.$font.' - '.$name);
 
     $metrics_name = $name . (($this->isUnicode) ? '.ufm' : '.afm');
     $cache_name = 'php_' . $metrics_name;
     $this->addMessage('metrics: '.$metrics_name.', cache: '.$cache_name);
-    if  (file_exists($dir . $cache_name)) {
+    if  (file_exists(DOMPDF_FONT_CACHE . $cache_name)) {
 
-      $this->addMessage('openFont: php file exists ' . $dir . $cache_name);
+      $this->addMessage('openFont: php file exists ' . DOMPDF_FONT_CACHE . $cache_name);
 
-      $tmp =  file_get_contents($dir . $cache_name);
+      $tmp =  file_get_contents(DOMPDF_FONT_CACHE . $cache_name);
 
       eval($tmp);
 
@@ -2674,7 +2692,11 @@ class  Cpdf {
 
       $this->fonts[$font] = $data;
 
-      file_put_contents($dir . $cache_name,  '$this->fonts[$font]=' . var_export($data,  true)  . ';');
+      //Because of potential trouble with php safe mode, expect that the folder already exists.
+      //If not existing, this will hit performance because of missing cached results.
+      if ( is_dir(substr(DOMPDF_FONT_CACHE,0,-1)) ) {
+        file_put_contents(DOMPDF_FONT_CACHE . $cache_name,  '$this->fonts[$font]=' . var_export($data,  true)  . ';');
+      }
     }
     
     if  (!isset($this->fonts[$font])) {
@@ -4816,34 +4838,119 @@ class  Cpdf {
 
 
   /**
+   * add a PNG image into the document, from a GD object
+   * this should work with remote files
+   */
+  function addImagePng($file, $x, $y, $w =  0, $h =  0, &$img) {
+    //if already cached, need not to read again
+	if ( isset($this->imagelist[$file]) ) {
+	  $data = null;
+	} else {
+  	  // Example for transparency handling on new image. Retain for current image
+      // $tIndex = imagecolortransparent($img);
+      // if ($tIndex > 0) {
+      //   $tColor    = imagecolorsforindex($img, $tIndex);
+      //   $new_tIndex    = imagecolorallocate($new_img, $tColor['red'], $tColor['green'], $tColor['blue']);
+      //   imagefill($new_img, 0, 0, $new_tIndex);
+      //   imagecolortransparent($new_img, $new_tIndex);
+      // }
+	  // blending mode (literal/blending) on drawing into current image. not relevant when not saved or not drawn
+	  //imagealphablending($img, true);
+	  //default, but explicitely set to ensure pdf compatibility
+      imagesavealpha($img, false);
+      
+      $error =  0;
+      //DEBUG_IMG_TEMP
+      //debugpng
+      if (DEBUGPNG) print '[addImagePng '.$file.']';
+
+      ob_start();
+      @imagepng($img);
+      //$data = ob_get_contents(); ob_end_clean();
+      $data = ob_get_clean();
+
+      if ($data == '') {
+        $error = 1;
+        $errormsg = 'trouble writing file from GD';
+        //DEBUG_IMG_TEMP
+        print 'trouble writing file from GD';
+	  }
+
+      if  ($error) {
+        $this->addMessage('PNG error - ('.$file.') '.$errormsg);
+        return;
+      }
+    }  //End isset($this->imagelist[$file]) (png Duplicate removal)
+
+    $this->addPngFromBuf($file, $x, $y, $w, $h, $data);
+  }
+
+
+  /**
    * add a PNG image into the document, from a file
    * this should work with remote files
    */
   function  addPngFromFile($file, $x, $y, $w =  0, $h =  0) {
-
-    // read in a png file, interpret it, then add to the system
-    $error =  0;
-
-    $tmp =  get_magic_quotes_runtime();
-
-    set_magic_quotes_runtime(0);
-
-    if  ( ($data =  file_get_contents($file)) ===  false) {
-
-      //   $fp = @fopen($file,'rb');
-      //   if ($fp){
-      //     $data = '';
-      //     while(!feof($fp)){
-      //       $data .= fread($fp,1024);
-      //     }
-      //     fclose($fp);
-      $error =  1;
-
-      $errormsg =  'trouble opening file: '.$file;
+    //if already cached, need not to read again
+	if ( isset($this->imagelist[$file]) ) {
+	  $img = null;
+	} else {
+      //png files typically contain an alpha channel.
+      //pdf file format or class.pdf does not support alpha blending.
+      //on alpha blended images, more transparent areas have a color near black.
+      //This appears in the result on not storing the alpha channel.
+      //Correct would be the box background image or its parent when transparent.
+      //But this would make the image dependent on the background.
+      //Therefore create an image with white background and copy in
+      //A more natural background than black is white.
+      //Therefore create an empty image with white background and merge the
+      //image in with alpha blending.
+      $imgtmp = @imagecreatefrompng($file);
+      if (!$imgtmp) {
+        return;
+      }
+      $sx = imagesx($imgtmp);
+      $sy = imagesy($imgtmp);
+      $img = imagecreatetruecolor($sx,$sy);
+      imagealphablending($img, true);
+  	  $ti = imagecolortransparent($imgtmp);
+	  if ($ti >= 0) {
+	    $tc = imagecolorsforindex($imgtmp,$ti);
+        $ti = imagecolorallocate($img,$tc['red'],$tc['green'],$tc['blue']);
+        imagefill($img,0,0,$ti);
+        imagecolortransparent($img, $ti);
+      } else {
+        imagefill($img,1,1,imagecolorallocate($img,255,255,255));
+      }
+      imagecopy($img,$imgtmp,0,0,0,0,$sx,$sy);
+      imagedestroy($imgtmp);
     }
+    $this->addImagePng($file, $x, $y, $w, $h, $img);
+  }
 
-    set_magic_quotes_runtime($tmp);
 
+  /**
+   * add a PNG image into the document, from a memory buffer of the file
+   */
+  function  addPngFromBuf($file, $x, $y, $w =  0, $h =  0, &$data) {
+
+	if ( isset($this->imagelist[$file]) ) {
+      //debugpng
+      //if (DEBUGPNG) print '[addPngFromBuf Duplicate '.$file.']';
+	  $data = null;
+      $info['width'] = $this->imagelist[$file]['w'];
+      $info['height'] = $this->imagelist[$file]['h'];
+      $label = $this->imagelist[$file]['label'];
+
+	} else {
+
+      if ($data == null) {
+      	$this->addMessage('addPngFromBuf error - ('.$imgname.') data not present!');
+        return;
+      }
+      //debugpng
+      //if (DEBUGPNG) print '[addPngFromBuf file='.$file.']';
+    $error =  0;
 
     if  (!$error) {
 
@@ -4852,6 +4959,9 @@ class  Cpdf {
       if  (substr($data, 0, 8) !=  $header) {
 
         $error =  1;
+
+        //debugpng
+        if (DEBUGPNG) print '[addPngFromFile this file does not have a valid header '.$file.']';
 
         $errormsg =  'this file does not have a valid header';
       }
@@ -4908,12 +5018,18 @@ class  Cpdf {
 
             $error =  1;
 
+            //debugpng
+            if (DEBUGPNG) print '[addPngFromFile unsupported compression method '.$file.']';
+
             $errormsg =  'unsupported compression method';
           }
 
           if  ($info['filterMethod'] !=  0) {
 
             $error =  1;
+
+            //debugpng
+            if (DEBUGPNG) print '[addPngFromFile unsupported filter method '.$file.']';
 
             $errormsg =  'unsupported filter method';
           }
@@ -4991,6 +5107,8 @@ class  Cpdf {
 
             //unsupported transparency type
 
+            //debugpng
+            if (DEBUGPNG) print '[addPngFromFile unsupported transparency type '.$file.']';
           }
 
           // KS End new code
@@ -5010,12 +5128,18 @@ class  Cpdf {
 
         $error =  1;
 
+        //debugpng
+        if (DEBUGPNG) print '[addPngFromFile information header is missing '.$file.']';
+
         $errormsg =  'information header is missing';
       }
 
       if  (isset($info['interlaceMethod']) &&  $info['interlaceMethod']) {
 
         $error =  1;
+
+        //debugpng
+        if (DEBUGPNG) print '[addPngFromFile no support for interlaced images in pdf '.$file.']';
 
         $errormsg =  'There appears to be no support for interlaced images in pdf.';
       }
@@ -5026,6 +5150,9 @@ class  Cpdf {
 
       $error =  1;
 
+      //debugpng
+      if (DEBUGPNG) print '[addPngFromFile bit depth of 8 or less is supported '.$file.']';
+
       $errormsg =  'only bit depth of 8 or less is supported';
     }
 
@@ -5035,6 +5162,9 @@ class  Cpdf {
       if  ($info['colorType'] !=  2 &&  $info['colorType'] !=  0 &&  $info['colorType'] !=  3) {
 
         $error =  1;
+
+        //debugpng
+        if (DEBUGPNG) print '[addPngFromFile alpha channel not supported: '.$info['colorType'].' '.$file.']';
 
         $errormsg =  'transparancey alpha channel not supported, transparency only supported for palette images.';
       } else {
@@ -5075,36 +5205,43 @@ class  Cpdf {
       return;
     }
 
-    if  ($w ==  0) {
+      //print_r($info);
+      // so this image is ok... add it in.
+      $this->numImages++;
+
+      $im =  $this->numImages;
+
+      $label =  'I'.$im;
+
+      $this->numObj++;
+
+      //  $this->o_image($this->numObj,'new',array('label' => $label,'data' => $idata,'iw' => $w,'ih' => $h,'type' => 'png','ic' => $info['width']));
+      $options =  array('label' => $label, 'data' => $idata, 'bitsPerComponent' => $info['bitDepth'], 'pdata' => $pdata, 'iw' => $info['width'], 'ih' => $info['height'], 'type' => 'png', 'color' => $color, 'ncolor' => $ncolor);
+
+      if  (isset($transparency)) {
+
+        $options['transparency'] =  $transparency;
+      }
+
+      $this->o_image($this->numObj, 'new', $options);
+
+      $this->imagelist[$file] = array('label' =>$label, 'w' => $info['width'], 'h' => $info['height']);
+    }
+
+    if  ($w <=  0 && $h <=  0) {
+      $w =  $info['width'];
+      $h =  $info['height'];
+    }
+
+    if  ($w <=  0) {
 
       $w =  $h/$info['height']*$info['width'];
     }
 
-    if  ($h ==  0) {
+    if  ($h <=  0) {
 
       $h =  $w*$info['height']/$info['width'];
     }
-
-    //print_r($info);
-    // so this image is ok... add it in.
-    $this->numImages++;
-
-    $im =  $this->numImages;
-
-    $label =  'I'.$im;
-
-    $this->numObj++;
-
-    //  $this->o_image($this->numObj,'new',array('label' => $label,'data' => $idata,'iw' => $w,'ih' => $h,'type' => 'png','ic' => $info['width']));
-    $options =  array('label' => $label, 'data' => $idata, 'bitsPerComponent' => $info['bitDepth'], 'pdata' => $pdata, 'iw' => $info['width'], 'ih' => $info['height'], 'type' => 'png', 'color' => $color, 'ncolor' => $ncolor);
-
-    if  (isset($transparency)) {
-
-      $options['transparency'] =  $transparency;
-    }
-
-    $this->o_image($this->numObj, 'new', $options);
-
 
     $this->objects[$this->currentContents]['c'].=  "\nq";
 
@@ -5129,22 +5266,42 @@ class  Cpdf {
       return;
     }
 
+	if ( isset($this->imagelist[$img]) ) {
+	  $data = null;
+      $imageWidth = $this->imagelist[$img]['w'];
+      $imageHeight = $this->imagelist[$img]['h'];
+      $channels =  $this->imagelist[$img]['c'];
+	} else {
 
-    $tmp =  getimagesize($img);
+      $tmp =  getimagesize($img);
 
-    $imageWidth =  $tmp[0];
+      $imageWidth =  $tmp[0];
 
-    $imageHeight =  $tmp[1];
+      $imageHeight =  $tmp[1];
 
 
-    if  (isset($tmp['channels'])) {
+      if  (isset($tmp['channels'])) {
 
-      $channels =  $tmp['channels'];
-    } else {
+        $channels =  $tmp['channels'];
+      } else {
 
-      $channels =  3;
+        $channels =  3;
+      }
+
+
+      //$fp = fopen($img,'rb');
+
+      $tmp =  get_magic_quotes_runtime();
+
+      set_magic_quotes_runtime(0);
+
+      $data =  file_get_contents($img);
+
+      //fread($fp,filesize($img));
+      set_magic_quotes_runtime($tmp);
+
+      //fclose($fp);
     }
-
 
     if  ($w <=  0 &&  $h <=  0) {
 
@@ -5161,22 +5318,7 @@ class  Cpdf {
       $h =  $w*$imageHeight/$imageWidth;
     }
 
-
-    //$fp = fopen($img,'rb');
-
-    $tmp =  get_magic_quotes_runtime();
-
-    set_magic_quotes_runtime(0);
-
-    $data =  file_get_contents($img);
-
-    //fread($fp,filesize($img));
-    set_magic_quotes_runtime($tmp);
-
-
-    //fclose($fp);
-
-    $this->addJpegImage_common($data, $x, $y, $w, $h, $imageWidth, $imageHeight, $channels);
+    $this->addJpegImage_common($data, $x, $y, $w, $h, $imageWidth, $imageHeight, $channels, $img);
   }
 
 
@@ -5186,6 +5328,16 @@ class  Cpdf {
    * the file based functions
    */
   function  addImage(&$img, $x, $y, $w =  0, $h =  0, $quality =  75) {
+
+    /* Todo:
+     * Pass in original filename as $imgname
+     * If already cached like image_iscached(), allow empty $img
+     * How to get w  and h in this case?
+     * Then caller can check with image_iscached() whether generation of image is needed.
+     *
+     * But anyway, this function is not used!
+     */
+    $imgname = tempnam(DOMPDF_TEMP_DIR, "adddompdf_img_").'.jpeg';
 
     // add a new image into the current location, as an external object
     // add the image at $x,$y, and with width and height as defined by $w & $h
@@ -5223,43 +5375,21 @@ class  Cpdf {
       $h =  $w*$imageHeight/$imageWidth;
     }
 
-
     // gotta get the data out of the img..
+    ob_start();
+    imagejpeg($img, '', $quality);
+    //$data = ob_get_contents(); ob_end_clean();
+    $data = ob_get_clean();
 
-    // so I write to a temp file, and then read it back.. soo ugly, my apologies.
-    $tmpDir =  '/tmp';
+    $this->addJpegImage_common($data, $x, $y, $w, $h, $imageWidth, $imageHeight, $imgname);
+  }
 
-    $tmpName =  tempnam($tmpDir, 'img');
 
-    imagejpeg($img, $tmpName, $quality);
-
-    //$fp = fopen($tmpName,'rb');
-
-    $tmp =  get_magic_quotes_runtime();
-
-    set_magic_quotes_runtime(0);
-
-    if  ( ($data =  file_get_contents($tmpName)) ===  false) {
-
-      //   $fp = @fopen($tmpName,'rb');
-      //   if ($fp){
-      //     $data = '';
-      //     while(!feof($fp)){
-      //       $data .= fread($fp,1024);
-      //     }
-      //     fclose($fp);
-      $error =  1;
-
-      $errormsg =  'trouble opening file';
-    }
-
-    //  $data = fread($fp,filesize($tmpName));
-    set_magic_quotes_runtime($tmp);
-
-    //  fclose($fp);
-    unlink($tmpName);
-
-    $this->addJpegImage_common($data, $x, $y, $w, $h, $imageWidth, $imageHeight);
+  /* Check if image already added to pdf image directory.
+   * If yes, need not to create again (pass empty data)
+   */
+  function  image_iscached($imgname) {
+    return isset($this->imagelist[$imgname]);
   }
 
 
@@ -5268,19 +5398,34 @@ class  Cpdf {
    *
    * @access private
    */
-  function  addJpegImage_common(&$data, $x, $y, $w =  0, $h =  0, $imageWidth, $imageHeight, $channels =  3) {
+  function  addJpegImage_common(&$data, $x, $y, $w =  0, $h =  0, $imageWidth, $imageHeight, $channels =  3, $imgname) {
 
-    // note that this function is not to be called externally
-    // it is just the common code between the GD and the file options
-    $this->numImages++;
+    if ( isset($this->imagelist[$imgname]) ) {
+      $label = $this->imagelist[$imgname]['label'];
+      //debugpng
+      //if (DEBUGPNG) print '[addJpegImage_common Duplicate '.$imgname.']';
 
-    $im =  $this->numImages;
+    } else {
 
-    $label =  'I'.$im;
+      if ($data == null) {
+      	$this->addMessage('addJpegImage_common error - ('.$imgname.') data not present!');
+        return;
+      }
 
-    $this->numObj++;
+      // note that this function is not to be called externally
+      // it is just the common code between the GD and the file options
+      $this->numImages++;
 
-    $this->o_image($this->numObj, 'new', array('label' => $label, 'data' => &$data, 'iw' => $imageWidth, 'ih' => $imageHeight, 'channels' => $channels));
+      $im =  $this->numImages;
+
+      $label =  'I'.$im;
+
+      $this->numObj++;
+
+      $this->o_image($this->numObj, 'new', array('label' => $label, 'data' => &$data, 'iw' => $imageWidth, 'ih' => $imageHeight, 'channels' => $channels));
+
+      $this->imagelist[$imgname] = array('label' =>$label, 'w' => $imageWidth, 'h' => $imageHeight, 'c'=> $channels );
+    }
 
 
     $this->objects[$this->currentContents]['c'].=  "\nq";
