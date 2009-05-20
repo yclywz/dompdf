@@ -281,11 +281,11 @@ class DOMPDF {
         throw new DOMPDF_Exception("File '$file' not found.");
 
       if ( strpos($realfile, DOMPDF_CHROOT) !== 0 )
-        throw new DOMPDF_Exception("Permission denied.");
+        throw new DOMPDF_Exception("Permission denied on $file.");
 
       // Exclude dot files (e.g. .htaccess)
       if ( substr(basename($realfile),0,1) == "." )
-        throw new DOMPDF_Exception("Permission denied.");
+        throw new DOMPDF_Exception("Permission denied on $file.");
 
       $file = $realfile;
     }

@@ -301,12 +301,14 @@ function is_percent($value) { return false !== mb_strpos($value, "%"); }
  * @return string The canonical path, or null if the path is invalid (e.g. /../../foo)
  */
 function dompdf_realpath($path) {
-
   // If the path is relative, prepend the current directory
-  if ( $path{0} != "/" )
+  if ( DIRECTORY_SEPARATOR === '/' && $path{0} != '/' )
     $path = getcwd() . "/" . $path;
 
-  $parts = explode("/", $path);
+  if ( DIRECTORY_SEPARATOR === '\\' && $path{1} != ':' )
+    $path = getcwd() . '\\' . $path;
+
+  $parts = explode(DIRECTORY_SEPARATOR, $path);
   $path = array();
 
   $i = 0;
@@ -331,7 +333,7 @@ function dompdf_realpath($path) {
     $i++;
   }
 
-  return "/" . join("/", $path);
+  return (DIRECTORY_SEPARATOR === '/' ? DIRECTORY_SEPARATOR : NULL) . join(DIRECTORY_SEPARATOR, $path);
 }
 
 /**

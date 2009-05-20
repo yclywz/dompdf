@@ -525,6 +525,7 @@ class Style {
         //too many implicite uses.
         // $this->props_set($prop, $parent->$prop);
         $this->$prop = $parent->$prop;
+      }
     }
           
     return $this;
