@@ -35,6 +35,15 @@
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
  * @package dompdf
  * @version 0.5.1
+ *
+ * Changes
+ * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @version 0.5.1.htischer.20090507
+ * - Specifity of css selector chain was too small because leading whitespace
+ *   to be counted as number of elements was removed
+ * - On parsing css properties accept and register !important attribute
+ * - Add optional debug output
+
  */
 
 /* $Id: stylesheet.cls.php,v 1.16 2006-07-07 21:31:04 benjcarson Exp $ */
@@ -284,6 +293,8 @@ class Stylesheet {
    */
   private function _specificity($selector) {
     // http://www.w3.org/TR/CSS21/cascade.html#specificity
+    // ignoring the ":" pseudoclass modifyers
+    // also ignored in _css_selector_to_xpath
 
     $a = ($selector === "!style attribute") ? 1 : 0;
     
@@ -294,6 +305,22 @@ class Stylesheet {
              mb_substr_count($selector, "+"), 255);
     
     $d = min(mb_substr_count($selector, " "), 255);
+
+    //If a normal element name is at the begining of the string,
+    //a leading whitespace might have been removed on whitespace collapsing and removal
+    //therefore there might be one whitespace less as selected element names
+    //this can lead to a too small specificity
+    //see _css_selector_to_xpath
+
+    if ( !in_array($selector{0}, array(" ", ">", ".", "#", "+", ":", "[")) ) {
+    	$d++;
+    }
+
+    if (DEBUGCSS) {
+      /*DEBUGCSS*/	print "<pre>\n";
+      /*DEBUGCSS*/	printf("_specificity(): 0x%08x \"%s\"\n", ($a << 24) | ($b << 16) | ($c << 8) | ($d), $selector);
+      /*DEBUGCSS*/	print "</pre>";
+    }
 
     return ($a << 24) | ($b << 16) | ($c << 8) | ($d);
   }
@@ -633,6 +660,19 @@ class Stylesheet {
         // Sort by specificity
         ksort($applied_styles);
 
+        if (DEBUGCSS) {
+          $debug_nodename = $frame->get_node()->nodeName;
+          print "<pre>\n[$debug_nodename\n";
+          foreach ($applied_styles as $spec => $arr) {
+            printf("specificity: 0x%08x\n",$spec);
+            foreach ($arr as $s) {
+              print "[\n";
+              $s->debug_print();
+              print "]\n";
+            }
+          }
+        }
+        
         // Merge the new styles with the inherited styles
         foreach ($applied_styles as $arr) {
           foreach ($arr as $s) 
@@ -642,13 +682,30 @@ class Stylesheet {
 
       // Inherit parent's styles if required
       if ( $p ) {
+
+        if (DEBUGCSS) {
+          print "inherit:\n";
+          print "[\n";
+          $p->get_style()->debug_print();
+          print "]\n";
+        }
+
         $style->inherit( $p->get_style() );
       }
 
-//       pre_r($frame->get_node()->nodeName . ":");
-//      echo "<pre>";
-//      echo $style;
-//      echo "</pre>";
+      if (DEBUGCSS) {
+        print "DomElementStyle:\n";
+        print "[\n";
+        $style->debug_print();
+        print "]\n";
+        print "/$debug_nodename]\n</pre>";
+      }
+
+      /*DEBUGCSS print: see below different print debugging method
+      pre_r($frame->get_node()->nodeName . ":");
+      echo "<pre>";
+      echo $style;
+      echo "</pre>";*/
       $frame->set_style($style);
       
     }
@@ -802,24 +859,66 @@ class Stylesheet {
   private function _parse_properties($str) {
     $properties = explode(";", $str);
 
+    if (DEBUGCSS) print '[_parse_properties';
+
     // Create the style
     $style = new Style($this);
     foreach ($properties as $prop) {
+      //A css property can have " ! important" appended (whitespace optional)
+      //strip this off to decode core of the property correctly.
+      //Pass on in the style to allow proper handling:
+      //!important properties can only be overridden by other !important ones.
+      //$style->$prop_name = is a shortcut of $style->__set($prop_name,$value);.
+      //If no specific set function available, set _props["prop_name"]
+      //style is always copied completely, or $_props handled separately
+      //Therefore set a _important_props["prop_name"]=true to indicate the modifier
 
+      /* Instead of short code, prefer the typical case with fast code
+	  $important = preg_match("/(.*?)!\s*important/",$prop,$match);
+      if ( $important ) {
+      	$prop = $match[1];
+      }
       $prop = trim($prop);
+      */
+      if (DEBUGCSS) print '(';
+ 	  $important = false;
+      $prop = trim($prop);
+      if (substr($prop,-9) == 'important') {
+      	$prop_tmp = rtrim(substr($prop,0,-9));
+      	if (substr($prop_tmp,-1) == '!') {
+      		$prop = rtrim(substr($prop_tmp,0,-1));
+      		$important = true;
+      	}
+      }
 
-      if ($prop == "")
+      if ($prop == "") {
+        if (DEBUGCSS) print 'empty)';
         continue;
+      }
 
       $i = mb_strpos($prop, ":");
-      if ( $i === false )
+      if ( $i === false ) {
+        if (DEBUGCSS) print 'novalue'.$prop.')';
         continue;
+      }
 
       $prop_name = mb_strtolower(mb_substr($prop, 0, $i));
       $value = mb_substr($prop, $i+1);
+      if (DEBUGCSS) print $prop_name.':='.$value.($important?'!IMPORTANT':'').')';
+      //New style, anyway empty
+      //if ($important || !$style->important_get($prop_name) ) {
+      //$style->$prop_name = array($value,$important);
+      //assignment might be replaced by overloading through __set,
+      //and overloaded functions might check _important_props,
+      //therefore set _important_props first.
+      if ($important) {
+        $style->important_set($prop_name);
+      }
+      //For easier debugging, don't use overloading of assignments with __set
       $style->$prop_name = $value;
-
+      //$style->props_set($prop_name, $value);
     }
+    if (DEBUGCSS) print '_parse_properties]';
 
     return $style;
   }
@@ -838,23 +937,31 @@ class Stylesheet {
     $str = preg_replace($patterns, $replacements, $str);
 
     $sections = explode("}", $str);
+    if (DEBUGCSS) print '[_parse_sections';
     foreach ($sections as $sect) {
       $i = mb_strpos($sect, "{");
 
       $selectors = explode(",", mb_substr($sect, 0, $i));
+      if (DEBUGCSS) print '[section';
       $style = $this->_parse_properties(trim(mb_substr($sect, $i+1)));
 
       // Assign it to the selected elements
       foreach ($selectors as $selector) {
         $selector = trim($selector);
-        
-        if ($selector == "")
+
+        if ($selector == "") {
+          if (DEBUGCSS) print '#empty#';
           continue;
-        
+        }
+        if (DEBUGCSS) print '#'.$selector.'#';
+        //if (DEBUGCSS) { if (strpos($selector,'p') !== false) print '!!!p!!!#'; }
+
         $this->add_style($selector, $style);
       }
+      if (DEBUGCSS) print 'section]';
     }
-  }  
+    if (DEBUGCSS) print '_parse_sections]';
+  }
 
   /**
    * dumps the entire stylesheet as a string

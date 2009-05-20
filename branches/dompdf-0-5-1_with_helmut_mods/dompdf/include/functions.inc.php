@@ -35,6 +35,13 @@
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
  * @package dompdf
  * @version 0.5.1
+ *
+ * Changes
+ * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @version 0.5.1.htischer.20090507
+ * - trailing slash of base_path in build_url is no longer optional when
+ *   required. This allows paths not ending in a slash, e.g. on dynamically
+ *   created sites with page id in the url parameters.
  */
 
 /* $Id: functions.inc.php,v 1.11 2006-07-07 21:31:03 benjcarson Exp $ */
@@ -94,10 +101,20 @@ function pre_var_dump($mixed) {
  * @param string $base_path
  * @param string $url
  * @return string
+ *
+ * Initially the trailing slash of $base_path was optional, and conditionally appended.
+ * However on dynamically created sites, where the page is given as url parameter,
+ * the base path might not end with an url.
+ * Therefore do not append a slash, and **require** the $base_url to ending in a slash
+ * when needed.
+ * Vice versa, on using the local file system path of a file, make sure that the slash
+ * is appended (o.k. also for Windows)
  */
 function build_url($protocol, $host, $base_path, $url) {
-  if ( mb_strlen($url) == 0 )
-    return $protocol . $host . rtrim($base_path, "/\\") . "/";
+  if ( mb_strlen($url) == 0 ) {
+    //return $protocol . $host . rtrim($base_path, "/\\") . "/";
+    return $protocol . $host . $base_path;
+  }
 
   // Is the url already fully qualified?
   if ( mb_strpos($url, "://") !== false )
@@ -105,21 +122,24 @@ function build_url($protocol, $host, $base_path, $url) {
 
   $ret = $protocol;
 
-  if ( !in_array(mb_strtolower($protocol), array("http://", "https://",
-                                                 "ftp://", "ftps://")) ) {
-    // We ignore the host for local file access, and run the path through
-    // realpath()
-    $host = "";
-    $base_path = realpath($base_path);
+  if (!in_array(mb_strtolower($protocol), array("http://", "https://", "ftp://", "ftps://"))) {
+    //On Windows local file, an abs path can begin also with a '\' or a drive letter
+    if ($url{0} !== '/' && (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' || $url{0} == '\\' || $url{1} !== ':' || ($url{2}!=='\\' && $url{2}!=='/'))) {
+      // We ignore the host for local file access, and run the path through
+      // realpath()
+      $ret .= realpath($base_path).'/';
+    }
+    $ret .= $url; 
+    return $ret;
   }
-  
-  if ( $url{0} === "/" )
+
+  if ( $url{0} === '/' ) {
     // Absolute path
     $ret .= $host . $url;
-  else {
+  } else {
     // Relative path
 
-    $base_path = $base_path !== "" ? rtrim($base_path, "/\\") . "/" : "";
+    //$base_path = $base_path !== "" ? rtrim($base_path, "/\\") . "/" : "";
     $ret .= $host . $base_path . $url;
   }
 
