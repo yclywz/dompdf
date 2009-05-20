@@ -37,7 +37,7 @@
  * @version 0.5.1
  */
 
-/* $Id: block_frame_decorator.cls.php,v 1.8 2006-07-07 21:31:02 benjcarson Exp $ */
+/* $Id: block_frame_decorator.cls.php,v 1.11 2007-08-22 23:02:06 benjcarson Exp $ */
 
 /**
  * Decorates frames for block layout
@@ -119,6 +119,7 @@ class Block_Frame_Decorator extends Frame_Decorator {
 
     if (is_numeric($h))
       $this->_lines[$lineno]["h"] = $h;
+
   }
 
 
@@ -141,33 +142,46 @@ class Block_Frame_Decorator extends Frame_Decorator {
       return;
     }
 
+    // Trim leading text if this is an empty line.  Kinda a hack to put it here,
+    // but what can you do...
+    if ( $this->_lines[$this->_cl]["w"] == 0 &&
+         $frame->get_node()->nodeName == "#text" &&
+         ($frame->get_style()->white_space != "pre" ||
+          $frame->get_style()->white_space != "pre-wrap") ) {
+
+      $frame->set_text( ltrim($frame->get_text()) );
+      $frame->recalculate_width();
+
+    }
+
     $w = $frame->get_margin_width();
 
     if ( $w == 0 )
       return;
-    
+
     // Debugging code:
+    /*
+    pre_r("\nAdding frame to line:");
 
-//     pre_r("\nAdding frame to line:");
+    //    pre_r("Me: " . $this->get_node()->nodeName . " (" . (string)$this->get_node() . ")");
+    //    pre_r("Node: " . $frame->get_node()->nodeName . " (" . (string)$frame->get_node() . ")");
+    if ( $frame->get_node()->nodeName == "#text" )
+      pre_r($frame->get_node()->nodeValue);
 
-//     pre_r("Me: " . $this->get_node()->nodeName . " (" . (string)$this->get_node() . ")");
-//     pre_r("Node: " . $frame->get_node()->nodeName . " (" . (string)$frame->get_node() . ")");
-//     if ( $frame->get_node()->nodeName == "#text" )
-//       pre_r($frame->get_node()->nodeValue);
-
-//     pre_r("Line width: " . $this->_lines[$this->_cl]["w"]);
-//     pre_r("Frame width: "  . $w);
-//     pre_r("Frame height: " . $frame->get_margin_height());
-//     pre_r("Containing block width: " . $this->get_containing_block("w"));
-
+    pre_r("Line width: " . $this->_lines[$this->_cl]["w"]);
+    pre_r("Frame: " . get_class($frame));
+    pre_r("Frame width: "  . $w);
+    pre_r("Frame height: " . $frame->get_margin_height());
+    pre_r("Containing block width: " . $this->get_containing_block("w"));
+    */
     // End debugging
 
     if ($this->_lines[$this->_cl]["w"] + $w > $this->get_containing_block("w"))
       $this->add_line();
 
     $frame->position();
-    
-    
+
+
     $this->_lines[$this->_cl]["frames"][] = $frame;
 
     if ( $frame->get_node()->nodeName == "#text")

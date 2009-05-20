@@ -44,7 +44,7 @@
  * - Add comments
  */
 
-/* $Id: font_metrics.cls.php,v 1.6 2006-07-07 21:31:03 benjcarson Exp $ */
+/* $Id: font_metrics.cls.php,v 1.7 2008-03-12 06:35:43 benjcarson Exp $ */
 
 require_once(DOMPDF_LIB_DIR . "/class.pdf.php");
 
@@ -219,7 +219,6 @@ class Font_Metrics {
 
     if ( $data != "" )
       eval ('self::$_font_lookup = ' . $data . ";");
-
   }
 
   /**

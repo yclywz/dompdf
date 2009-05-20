@@ -42,7 +42,7 @@
  * - add optional debug output
  */
 
-/* $Id: image_frame_decorator.cls.php,v 1.11 2006-07-07 21:31:03 benjcarson Exp $ */
+/* $Id: image_frame_decorator.cls.php,v 1.12 2006-08-02 18:44:25 benjcarson Exp $ */
 
 /**
  * Decorates frames for image layout and rendering
@@ -86,7 +86,7 @@ class Image_Frame_Decorator extends Frame_Decorator {
     
     parent::__construct($frame, $dompdf);
     $url = $frame->get_node()->getAttribute("src");
-
+      
     //debugpng
     if (DEBUGPNG) print '[__construct '.$url.']';
 

@@ -63,7 +63,7 @@
  * - Added debug output
  */
 
-/* $Id: style.cls.php,v 1.18 2006-07-07 21:31:04 benjcarson Exp $ */
+/* $Id: style.cls.php,v 1.22 2008-03-12 06:35:43 benjcarson Exp $ */
 
 /**
  * Represents CSS properties.
@@ -874,6 +874,7 @@ class Style {
     }
     $families = explode(",", $this->_props["font_family"]);
     reset($families);
+
     $font = null;
     while ( current($families) ) {
       list(,$family) = each($families);
@@ -1482,10 +1483,16 @@ class Style {
   function set_background_repeat($val) {
     if ( is_null($val) )
       $val = self::$_defaults["background_repeat"];
-
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
     //$this->_prop_cache["background_repeat"] = null;
     $this->_props["background_repeat"] = $val;
+
+
+
+
+
+
+
   }
 
   /**
