@@ -1418,7 +1418,7 @@ class Style {
     // Resolve the url now in the context of the current stylesheet
     $parsed_url = explode_url($val);
     if ( $parsed_url["protocol"] == "" && $this->_stylesheet->get_protocol() == "" )
-      return realpath($this->_stylesheet->get_base_path() . $parsed_url["file"]);
+      return dompdf_realpath($this->_stylesheet->get_base_path() . $parsed_url["file"]);
     else
       return build_url($this->_stylesheet->get_protocol(),
                        $this->_stylesheet->get_host(),

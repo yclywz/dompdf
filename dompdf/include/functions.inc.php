@@ -302,12 +302,16 @@ function is_percent($value) { return false !== mb_strpos($value, "%"); }
  */
 function dompdf_realpath($path) {
   // If the path is relative, prepend the current directory
-  if ( DIRECTORY_SEPARATOR === '/' && $path{0} != '/' )
-    $path = getcwd() . "/" . $path;
-
-  if ( DIRECTORY_SEPARATOR === '\\' && $path{1} != ':' )
-    $path = getcwd() . '\\' . $path;
-
+  if ( strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ) {
+    if ( $path{0} == '/' || $path{0} == '\\' ) {
+      $path = substr(getcwd(),0,2) . $path;
+    } else if ($path{1} != ':' ) {
+      $path = getcwd() . DIRECTORY_SEPARATOR . $path;
+    }
+  } else if ($path{0} != '/') {
+    $path = getcwd() . DIRECTORY_SEPARATOR . $path;
+  }
+ 
   $parts = explode(DIRECTORY_SEPARATOR, $path);
   $path = array();
 
