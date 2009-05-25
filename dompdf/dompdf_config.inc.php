@@ -80,6 +80,8 @@ define("DOMPDF_LIB_DIR", DOMPDF_DIR . "/lib");
  * Times-Roman, Times-Bold, Times-BoldItalic, Times-Italic,
  * Symbol,
  * ZapfDingbats,
+ *
+ * *Please note the trailing slash.*
  */
 define("DOMPDF_FONT_DIR", DOMPDF_DIR . "/lib/fonts/");
 
@@ -96,10 +98,11 @@ define("DOMPDF_FONT_DIR", DOMPDF_DIR . "/lib/fonts/");
 define("DOMPDF_FONT_CACHE", DOMPDF_FONT_DIR);
 
 /**
- * The location of the system's temporary directory.
+ * The location of a temporary directory.
  *
- * This directory must be writeable by the webserver process.
- * It is used to download remote images.
+ * If it does not exist, the system tmp folder will be used.
+ * The used temporary directory must be writeable by the webserver process.
+ * It is required to download remote images and on use of backend pdfLib.
  * Since e.g. on Windows there is no mandatory tmp location, we should 
  * consider using sys_get_temp_dir().
  */
@@ -113,6 +116,9 @@ define("DOMPDF_TEMP_DIR", "/tmp");
  * subdirectory of this directory.  DO NOT set it to '/' since this could
  * allow an attacker to use dompdf to read any files on the server.  This
  * should be an absolute path.
+ * This is only checked on command line call by dompdf.php, but not by
+ * direct class use like:
+ * $dompdf = new DOMPDF();	$dompdf->load_html($htmldata); $dompdf->render(); $pdfdata = $dompdf->output();
  */
 define("DOMPDF_CHROOT", realpath(DOMPDF_DIR));
 
@@ -209,7 +215,7 @@ define("DOMPDF_DEFAULT_FONT", "serif");
 /**
  * Image DPI setting
  *
- * This setting determines the default DPI setting for images.  The
+ * This setting determines the default DPI setting for images and fonts.  The
  * DPI may be overridden for inline images by explictly setting the
  * image's width & height style attributes (i.e. if the image's native
  * width is 600 pixels and you specify the image's width as 72 points,
@@ -239,7 +245,7 @@ define("DOMPDF_DEFAULT_FONT", "serif");
  *
  * @var int
  */
-define("DOMPDF_DPI", "150");
+define("DOMPDF_DPI", 96);
 
 /**
  * Enable inline PHP
@@ -261,6 +267,7 @@ define("DOMPDF_ENABLE_PHP", true);
  *
  * If this setting is set to true, DOMPDF will access remote sites for
  * images and CSS files as required.
+ * This is required for test case www/test/image_variants.html through www/examples.php
  *
  * @var bool 
  */
