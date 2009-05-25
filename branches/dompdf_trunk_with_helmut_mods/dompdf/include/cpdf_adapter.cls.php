@@ -36,15 +36,19 @@
  * @copyright 2004 Benj Carson
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
  * @contributor Orion Richardson <orionr@yahoo.com>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @package dompdf
  * @version 0.5.1
  *
  * Changes
- * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version 0.5.1.htischer.20090507
  * - On gif to png conversion tmp file creation, clarify tmp name and add to tmp deletion list only on success
  * - On gif to png conversion, when available add direct from gd without tmp file, skip image load if already cached.
  *   to safe CPU time and memory
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
+ * @version dompdf_trunk_with_helmut_mods.20090524
+ * - Pass temp and fontcache folders to Cpdf, to making Cpdf independent from dompdf
  */
 
 /* $Id: cpdf_adapter.cls.php,v 1.22 2009-04-29 04:11:35 benjcarson Exp $ */
@@ -209,7 +213,7 @@ class CPDF_Adapter implements Canvas {
       $size[2] = $a;
     }
     
-    $this->_pdf = new Cpdf($size, DOMPDF_UNICODE_ENABLED);
+    $this->_pdf = new Cpdf($size, DOMPDF_UNICODE_ENABLED, DOMPDF_FONT_CACHE, DOMPDF_TEMP_DIR);
     $this->_pdf->addInfo("Creator", "dompdf");
 
     // Silence pedantic warnings about missing TZ settings
