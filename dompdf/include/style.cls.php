@@ -33,11 +33,12 @@
  * @link http://www.digitaljunkies.ca/dompdf
  * @copyright 2004 Benj Carson
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @package dompdf
  * @version 0.5.1
  *
  * Changes
- * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version 0.5.1.htischer.20090507
  * - Fix px to pt conversion according to DOMPDF_DPI
  * - Recognize css styles with !important attribute, and store !important attribute within style
@@ -61,6 +62,10 @@
  * - special treatment of css images "none" instead of url(...), otherwise would prepend string "none" with path name
  * - Added comments
  * - Added debug output
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
+ * @version dompdf_trunk_with_helmut_mods.20090524
+ * - Allow superflous white space and string delimiter in font search path.
+ *   Restore lost change of default font of above
  */
 
 /* $Id: style.cls.php,v 1.22 2008-03-12 06:35:43 benjcarson Exp $ */
@@ -835,6 +840,9 @@ class Style {
    * @return string
    */
   function get_font_family() {
+  
+  $DEBUGCSS=DEBUGCSS; //=DEBUGCSS; Allow override of global setting for ad hoc debug
+	
     // Select the appropriate font.  First determine the subtype, then check
     // the specified font-families for a candidate.
 
@@ -869,7 +877,7 @@ class Style {
       $subtype = "normal";
     
     // Resolve the font family
-    if (DEBUGCSS) {
+    if ($DEBUGCSS) {
       print "<pre>[get_font_family:";
       print '('.$this->_props["font_family"].'.'.$font_style.'.'.$this->__get("font_weight").'.'.$weight.'.'.$subtype.')';
     }
@@ -879,21 +887,24 @@ class Style {
     $font = null;
     while ( current($families) ) {
       list(,$family) = each($families);
-      if (DEBUGCSS) print '('.$family.')';
+      //remove leading and trailing string delimiters, e.g. on font names with spaces;
+      //remove leading and trailing whitespace
+      $family=trim($family," \t\n\r\x0B\"'");
+      if ($DEBUGCSS) print '('.$family.')';
       $font = Font_Metrics::get_font($family, $subtype);
 
       if ( $font ) {
-        if (DEBUGCSS)  print '('.$font.")get_font_family]\n</pre>";
+        if ($DEBUGCSS)  print '('.$font.")get_font_family]\n</pre>";
         return $font;
       }
     }
 
-    if (DEBUGCSS)  print '('.$family.')';
-    $font = Font_Metrics::get_font($family, $subtype);
     $family = null;
+    if ($DEBUGCSS)  print '(default)';
+    $font = Font_Metrics::get_font($family, $subtype);
 
     if ( $font ) {
-      if (DEBUGCSS) print '('.$font.")get_font_family]\n</pre>";
+      if ($DEBUGCSS) print '('.$font.")get_font_family]\n</pre>";
       return $font;
     }
     throw new DOMPDF_Exception("Unable to find a suitable font replacement for: '" . $this->_props["font_family"] ."'");
