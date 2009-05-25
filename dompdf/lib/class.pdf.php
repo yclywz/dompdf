@@ -21,11 +21,12 @@
    *
    * @author       Wayne Munro <pdf@ros.co.nz>
    * @contributor  Orion Richardson <orionr@yahoo.com>
+   * @contributor  Helmut Tischer <htischer@weihenstephan.org>
    * @version  009
    * @package  Cpdf
    *
    * Changes
-   * @author Helmut Tischer <htischer@weihenstephan.org>
+   * @contributor Helmut Tischer <htischer@weihenstephan.org>
    * @version 0.5.1.htischer.20090507
    * - On multiple identical png and jpg images, put only one copy into the pdf file and refer to it.
    *   This reduces file size and rendering time.
@@ -35,6 +36,9 @@
    * - On addImage avoid temporary file. Todo: Duplicate Image (currently not used)
    * - Add a check function, whether image is already cached, This avoids double creation by caller which saves
    *   CPU time and memory.
+   * @contributor Helmut Tischer <htischer@weihenstephan.org>
+   * @version dompdf_trunk_with_helmut_mods.20090524
+   * - Allow temp and fontcache folders to be passed in by class creator
    */
 class  Cpdf {
 
@@ -202,6 +206,23 @@ class  Cpdf {
    * the value of this array is initialised in the constuctor function.
    */
   public  $fontFamilies =  array();
+ 
+  /**
+   * folder for php serialized formats of font metrics files.
+   * If empty string, use same folder as original metrics files.
+   * This can be passed in from class creator.
+   * If this folder does not exist or is not writable, Cpdf will be **much** slower.
+   * Because of potential trouble with php safe mode, folder cannot be created at runtime.
+   */ 
+  public  $fontcache = '';
+  
+  /**
+   * temporary folder.
+   * If empty string, will attempty system tmp folder.
+   * This can be passed in from class creator.
+   * Only used for conversion of gd images to jpeg images.
+   */
+  public  $tmp = '';
 
   /**
    * track if the current font is bolded or italicised
@@ -277,10 +298,13 @@ class  Cpdf {
    * @var array array of 4 numbers, defining the bottom left and upper right corner of the page. first two are normally zero.
    * @var boolean whether text will be treated as Unicode or not.
    */
-  function  Cpdf ($pageSize = array(0, 0, 612, 792), $isUnicode = false) {
+  function  Cpdf ($pageSize = array(0, 0, 612, 792), $isUnicode = false, $fontcache = '', $tmp = '') {
 
     $this->isUnicode = $isUnicode;
 
+    $this->fontcache = $fontcache;
+
+    $this->tmp = $tmp;
 
     $this->newDocument($pageSize);
 
@@ -2467,18 +2491,28 @@ class  Cpdf {
 
       $name = substr($font, $pos+1);
     }
-    // $dir replaced by DOMPDF_FONT_CACHE in HT's mods
-    // BS: Was this done thoroughly? I see some places where $dir is still used
+    
+    $fontcache = $this->fontcache;
+    if ($fontcache == '') {
+    	$fontcache = $dir;
+    }
+    
+    //$name       filename without folder and extension of font metrics
+    //$dir		  folder of font metrics
+    //$fontcache  folder of runtime created php serialized version of font metrics.
+    //            If this is not given, the same folder as the font metrics will be used. 
+    //            Storing and reusing serialized versions improves speed much
+                
     $this->addMessage('openFont: '.$font.' - '.$name);
 
     $metrics_name = $name . (($this->isUnicode) ? '.ufm' : '.afm');
     $cache_name = 'php_' . $metrics_name;
     $this->addMessage('metrics: '.$metrics_name.', cache: '.$cache_name);
-    if  (file_exists(DOMPDF_FONT_CACHE . $cache_name)) {
+    if  (file_exists($fontcache . $cache_name)) {
 
-      $this->addMessage('openFont: php file exists ' . DOMPDF_FONT_CACHE . $cache_name);
+      $this->addMessage('openFont: php file exists ' . $fontcache . $cache_name);
 
-      $tmp =  file_get_contents(DOMPDF_FONT_CACHE . $cache_name);
+      $tmp =  file_get_contents($fontcache . $cache_name);
 
       eval($tmp);
 
@@ -2694,8 +2728,8 @@ class  Cpdf {
 
       //Because of potential trouble with php safe mode, expect that the folder already exists.
       //If not existing, this will hit performance because of missing cached results.
-      if ( is_dir(substr(DOMPDF_FONT_CACHE,0,-1)) ) {
-        file_put_contents(DOMPDF_FONT_CACHE . $cache_name,  '$this->fonts[$font]=' . var_export($data,  true)  . ';');
+      if ( is_dir(substr($fontcache,0,-1)) ) {
+        file_put_contents($fontcache . $cache_name,  '$this->fonts[$font]=' . var_export($data,  true)  . ';');
       }
     }
     
@@ -5337,7 +5371,7 @@ class  Cpdf {
      *
      * But anyway, this function is not used!
      */
-    $imgname = tempnam(DOMPDF_TEMP_DIR, "adddompdf_img_").'.jpeg';
+    $imgname = tempnam($this->tmp, "cpdf_img_").'.jpeg';
 
     // add a new image into the current location, as an external object
     // add the image at $x,$y, and with width and height as defined by $w & $h
