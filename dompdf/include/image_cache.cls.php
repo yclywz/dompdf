@@ -33,16 +33,20 @@
  * @link http://www.digitaljunkies.ca/dompdf
  * @copyright 2004 Benj Carson
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @package dompdf
  * @version 0.5.1
  *
  * Changes
- * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version 0.5.1.htischer.20090507
  * - On getting type of images don't require any file endings
  *   and don't strip off url parameters,
  *   to allowing dynamically generated sites with image id
  *   in url parameters and not at end of url or missing file extension
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
+ * @version dompdf_trunk_with_helmut_mods.20090524
+ * - Made debug messages more individually configurable
  */
 
 /* $Id */
@@ -79,8 +83,10 @@ class Image_Cache {
 
     $parsed_url = explode_url($url);
 
+    $DEBUGPNG=DEBUGPNG; //=DEBUGPNG; Allow override of global setting for ad hoc debug
+    
     //debugpng
-    if (DEBUGPNG) print 'resolve_url('.$url.','.$proto.','.$host.','.$base_path.')('.$parsed_url['protocol'].')';
+    if ($DEBUGPNG) print 'resolve_url('.$url.','.$proto.','.$host.','.$base_path.')('.$parsed_url['protocol'].')';
 
     $remote = ($proto != "" && $proto != "file://");
     $remote = $remote || ($parsed_url['protocol'] != "");
@@ -90,7 +96,7 @@ class Image_Cache {
       $ext = "png";
 
       //debugpng
-      if (DEBUGPNG) $full_url_dbg = '(blockedremote)';
+      if ($DEBUGPNG) $full_url_dbg = '(blockedremote)';
 
     } else if ( DOMPDF_ENABLE_REMOTE && $remote ) {
       // Download remote files to a temporary directory
@@ -100,12 +106,13 @@ class Image_Cache {
         list($resolved_url,$ext) = self::$_cache[$full_url];
 
         //debugpng
-        if (DEBUGPNG) $full_url_dbg = $full_url.'(cache)';
+        if ($DEBUGPNG) $full_url_dbg = $full_url.'(cache)';
 
       } else {
 
         $resolved_url = tempnam(DOMPDF_TEMP_DIR, "ca_dompdf_img_");
-        //echo $resolved_url . "\n";
+        //debugpng
+        if ($DEBUGPNG) echo $resolved_url . "\n";
 
         $old_err = set_error_handler("record_warnings");
         $image = file_get_contents($full_url);
@@ -115,7 +122,7 @@ class Image_Cache {
           $image = file_get_contents(DOMPDF_LIB_DIR . "/res/broken_image.png");
 
           //debugpng
-          if (DEBUGPNG) $full_url_dbg = $full_url.'(missing)';
+          if ($DEBUGPNG) $full_url_dbg = $full_url.'(missing)';
 
         }
 
@@ -144,25 +151,25 @@ class Image_Cache {
     } else {
 
       $resolved_url = build_url($proto, $host, $base_path, $url);
-      if (DEBUGPNG) print 'build_url('.$proto.','.$host.','.$base_path.','.$url.')('.$resolved_url.')';
+      if ($DEBUGPNG) print 'build_url('.$proto.','.$host.','.$base_path.','.$url.')('.$resolved_url.')';
 
       if ( !preg_match("/.*\.(\w+)/",$url,$match) ) {
         //debugpng
-        if (DEBUGPNG) print '[resolve_url exception '.$url.']';
+        if ($DEBUGPNG) print '[resolve_url exception '.$url.']';
           throw new DOMPDF_Exception("Unknown image type: $url.");
         }
 
         $ext = $match[1];
 
         //debugpng
-        if (DEBUGPNG) $full_url_dbg = '(local)';
+        if ($DEBUGPNG) $full_url_dbg = '(local)';
 
     }
 
     if ( !is_readable($resolved_url) || !filesize($resolved_url) ) {
 
       //debugpng
-      if (DEBUGPNG) $full_url_dbg .= '(nocache'.$resolved_url.')';
+      if ($DEBUGPNG) $full_url_dbg .= '(nocache'.$resolved_url.')';
 
       $_dompdf_warnings[] = "File " .$resolved_url . " is not readable or is an empty file.\n";
       $resolved_url = DOMPDF_LIB_DIR . "/res/broken_image.png";
@@ -170,7 +177,7 @@ class Image_Cache {
     }
 
     //debugpng
-    if (DEBUGPNG) print '[resolve_url '.$url.'|'.$full_url_dbg.'|'.$resolved_url.'|'.$ext.']';
+    if ($DEBUGPNG) print '[resolve_url '.$url.'|'.$full_url_dbg.'|'.$resolved_url.'|'.$ext.']';
 
     return array($resolved_url, $ext);
   }
