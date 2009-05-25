@@ -44,6 +44,13 @@ div.bgimages ul {
 <h2>local png image with alpha channel:</h2>
 <img src="images/dokuwiki-128.png" width="128" height="128"/>
 
+<h2 style="color:red;">Attention!</h2>
+
+<p style="color:red;">For external images to work, the following configuration is required:</p>
+<pre style="color:red;">dompdf_config.inc.php :</pre>
+
+<pre style="color:red;">define("DOMPDF_ENABLE_REMOTE", true);</pre>
+
 <h2>external png Image with alpha channel:</h2>
 <img src="http://www.dokuwiki.org/lib/exe/fetch.php?media=wiki:dokuwiki-128.png" width="128" height="128" />
 
@@ -55,7 +62,6 @@ div.bgimages ul {
 
 <h2>external Image without file extension (.gif):</h2>
 <img width="82" height="233" src="http://www.taz.de/fileadmin/templates/neu/images/logo" />
-
 
 <h2><a name="bgimages">Background images</a></h2>
 <div class="bgimages">
