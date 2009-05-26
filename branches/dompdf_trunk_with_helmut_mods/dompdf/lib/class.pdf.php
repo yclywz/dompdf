@@ -4907,7 +4907,8 @@ class  Cpdf {
         $error = 1;
         $errormsg = 'trouble writing file from GD';
         //DEBUG_IMG_TEMP
-        print 'trouble writing file from GD';
+        //debugpng
+        if (DEBUGPNG) print 'trouble writing file from GD';
 	  }
 
       if  ($error) {
