@@ -172,10 +172,12 @@ abstract class Abstract_Renderer {
     }
 
     //clip background to the image area on partial repeat. Nothing to do if img off area
-    //On repeat, normalize start position to the first within the image
+    //On repeat, normalize start position to the tile at immediate left/top or 0/0 of area
     //On no repeat with positive offset: move size/start to have offset==0
+    //Handle x/y Dimensions separately
 
     if ( $repeat != "repeat" && $repeat != "repeat-x" ) {
+      //No repeat x
       if ($bg_x < 0) {
         $bg_width = $img_w + $bg_x;
       } else {
@@ -191,8 +193,9 @@ abstract class Abstract_Renderer {
       }
       $width = (float)($bg_width * 72)/DOMPDF_DPI;
     } else {
+      //repeat x
       if ($bg_x < 0) {
-        $bg_x = $img_w - ((-$bg_x) % $img_w);
+        $bg_x = - ((-$bg_x) % $img_w);
       } else {
         $bg_x = $bg_x % $img_w;
         if ($bg_x > 0) {
@@ -202,6 +205,7 @@ abstract class Abstract_Renderer {
     }
 
     if ( $repeat != "repeat" && $repeat != "repeat-y" ) {
+      //no repeat y
       if ($bg_y < 0) {
         $bg_height = $img_h + $bg_y;
       } else {
@@ -217,8 +221,9 @@ abstract class Abstract_Renderer {
       }
       $height = (float)($bg_height * 72)/DOMPDF_DPI;
     } else {
+      //repeat y
       if ($bg_y < 0) {
-        $bg_y = $img_h - ((-$bg_y) % $img_h);
+        $bg_y = - ((-$bg_y) % $img_h);
       } else {
         $bg_y = $bg_y % $img_h;
         if ($bg_y > 0) {
@@ -227,14 +232,51 @@ abstract class Abstract_Renderer {
       }
     }
 
+    //Optimization, if repeat has no effect
+    if ( $repeat == "repeat" && $bg_y <= 0 && $img_h+$bg_y >= $bg_height ) {
+      $repeat = "repeat-x";
+    }
+    if ( $repeat == "repeat" && $bg_x <= 0 && $img_w+$bg_x >= $bg_width ) {
+      $repeat = "repeat-y";
+    }
+    if ( ($repeat == "repeat-x" && $bg_x <= 0 && $img_w+$bg_x >= $bg_width) ||
+         ($repeat == "repeat-y" && $bg_y <= 0 && $img_h+$bg_y >= $bg_height) ) {
+      $repeat = "no-repeat";
+    }
+
 	//Use filename as indicator only
 	//different names for different variants to have different copies in the pdf
 	//This is not dependent of background color of box! .'_'.(is_array($bg_color) ? $bg_color["hex"] : $bg_color)
 	//Note: Here, bg_* are the start values, not end values after going through the tile loops!
-	$filedummy = $img.'_'.$bg_width.'_'.$bg_height.'_'.$bg_x.'_'.$bg_y.'_'.$repeat;
 
+	$filedummy = $img;
+
+    /* 
+    //Make shorter strings with limited characters for cache associative array index - needed?	
+	//Strip common base path - server root, explicite temp, default temp; remove unwanted characters;
+	$filedummy = strtr($filedummy,"\\:","//");
+	$p = strtr($_SERVER["DOCUMENT_ROOT"],"\\:","//");
+	$l = strlen($p);
+	if ( substr($filedummy,0,$l) == $p) {
+	  $filedummy = substr($filedummy,$l);
+	} else {
+      $p = strtr(DOMPDF_TEMP_DIR,"\\:","//");
+	  $l = strlen($p);
+	  if ( substr($filedummy,0,$l) == $p) {
+	    $filedummy = substr($filedummy,$l);
+	  } else {
+        $p = strtr(sys_get_temp_dir(),"\\:","//");
+	    $l = strlen($p);
+	    if ( substr($filedummy,0,$l) == $p) {
+	      $filedummy = substr($filedummy,$l);
+	    }
+	  }
+	}
+	*/
+	
+	$filedummy .= '_'.$bg_width.'_'.$bg_height.'_'.$bg_x.'_'.$bg_y.'_'.$repeat;
     //debugpng
-    //if (DEBUGPNG) print '[_background_image name '.$filedummy.']';
+    //if (DEBUGPNG) print '<pre>[_background_image name '.$filedummy.']</pre>';
 
     //Optimization to avoid multiple times rendering the same image.
     //If check functions are existing and identical image already cached,
@@ -309,18 +351,6 @@ abstract class Abstract_Renderer {
       $dst_y = $bg_y;
     }
 
-    //Optimization, if repeat has no effect
-    if ( $repeat == "repeat" && $img_h >= $bg_height && $bg_y == 0 ) {
-      $repeat = "repeat-x";
-    }
-    if ( $repeat == "repeat" && $img_w >= $bg_width && $bg_x == 0 ) {
-      $repeat = "repeat-y";
-    }
-    if ( ($repeat == "repeat-x" && $img_w >= $bg_width && $bg_x == 0) ||
-         ($repeat == "repeat-y" && $img_h >= $bg_height && $bg_y == 0) ) {
-      $repeat = "no-repeat";
-    }
-
 	//For historical reasons exchange meanings of variables:
 	//start_* will be the start values, while bg_* will be the temporary start values in the loops
     $start_x = $bg_x;
@@ -364,7 +394,7 @@ abstract class Abstract_Renderer {
 
       }
 
-    } else {
+    } else if ( $repeat == "repeat" ) {
 
       for ( $bg_y = $start_y; $bg_y < $bg_height; $bg_y += $img_h ) {
         for ( $bg_x = $start_x; $bg_x < $bg_width; $bg_x += $img_w ) {
@@ -391,7 +421,9 @@ abstract class Abstract_Renderer {
           imagecopy($bg, $src, $dst_x, $dst_y, $src_x, $src_y, $w, $h);
         }
       }
-    }
+    } else {
+ print 'Unknown repeat!';
+    }   
 
     } /* End optimize away creation of duplicates */
 
