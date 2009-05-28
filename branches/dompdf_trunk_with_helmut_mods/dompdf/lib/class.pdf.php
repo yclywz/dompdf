@@ -39,6 +39,8 @@
    * @contributor Helmut Tischer <htischer@weihenstephan.org>
    * @version dompdf_trunk_with_helmut_mods.20090524
    * - Allow temp and fontcache folders to be passed in by class creator
+   * @version dompdf_trunk_with_helmut_mods.20090528
+   * - typo 'decent' instead of 'descent' at various locations made getFontDescender worthless
    */
 class  Cpdf {
 
@@ -3663,11 +3665,11 @@ class  Cpdf {
 
 
   /**
-   * return the font decender, this will normally return a negative number
+   * return the font descender, this will normally return a negative number
    * if you add this number to the baseline, you get the level of the bottom of the font
    * it is in the pdf user units
    */
-  function  getFontDecender($size) {
+  function  getFontDescender($size) {
 
     // note that this will most likely return a negative value
     if  (!$this->numFonts) {
@@ -3676,7 +3678,7 @@ class  Cpdf {
     }
 
     //$h = $this->fonts[$this->currentFont]['FontBBox'][1];
-    $h = $this->fonts[$this->currentFont]['Decender'];
+    $h = $this->fonts[$this->currentFont]['Descender'];
 
     return  $size*$h/1000;
   }
@@ -4056,10 +4058,10 @@ class  Cpdf {
 
               // need to assess the text position, calculate the text width to this point
               // can use getTextWidth to find the text width I think
-              // also add the text height and decender
+              // also add the text height and descender
               $tmp =  $this->PRVTgetTextPosition($x, $y, $angle, $size, $wordSpaceAdjust, substr($text, 0, $i));
 
-              $info =  array('x' => $tmp[0], 'y' => $tmp[1], 'angle' => $angle, 'status' => 'start', 'p' => $parm, 'f' => $func, 'height' => $this->getFontHeight($size), 'decender' => $this->getFontDecender($size));
+              $info =  array('x' => $tmp[0], 'y' => $tmp[1], 'angle' => $angle, 'status' => 'start', 'p' => $parm, 'f' => $func, 'height' => $this->getFontHeight($size), 'descender' => $this->getFontDescender($size));
 
               $x =  $tmp[0];
 
@@ -4129,7 +4131,7 @@ class  Cpdf {
                        'p' => $this->callback[$i]['p'],
                        'nCallback' => $this->callback[$i]['nCallback'],
                        'height' => $this->callback[$i]['height'],
-                       'decender' => $this->callback[$i]['decender']);
+                       'descender' => $this->callback[$i]['descender']);
 
         $func =  $this->callback[$i]['f'];
 
@@ -4228,7 +4230,7 @@ class  Cpdf {
         // call each function
         $tmp =  $this->PRVTgetTextPosition($x, $y, $angle, $size, $wordSpaceAdjust, $text);
 
-        $info =  array('x' => $tmp[0], 'y' => $tmp[1], 'angle' => $angle, 'status' => 'eol', 'p' => $this->callback[$i]['p'], 'nCallback' => $this->callback[$i]['nCallback'], 'height' => $this->callback[$i]['height'], 'decender' => $this->callback[$i]['decender']);
+        $info =  array('x' => $tmp[0], 'y' => $tmp[1], 'angle' => $angle, 'status' => 'eol', 'p' => $this->callback[$i]['p'], 'nCallback' => $this->callback[$i]['nCallback'], 'height' => $this->callback[$i]['height'], 'descender' => $this->callback[$i]['descender']);
 
         $func =  $this->callback[$i]['f'];
 
