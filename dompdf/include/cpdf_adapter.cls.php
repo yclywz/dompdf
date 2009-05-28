@@ -49,6 +49,8 @@
  * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version dompdf_trunk_with_helmut_mods.20090524
  * - Pass temp and fontcache folders to Cpdf, to making Cpdf independent from dompdf
+ * @version dompdf_trunk_with_helmut_mods.20090528
+ * - fix text position according to glyph baseline to match background rectangle
  */
 
 /* $Id: cpdf_adapter.cls.php,v 1.22 2009-04-29 04:11:35 benjcarson Exp $ */
@@ -667,7 +669,39 @@ class CPDF_Adapter implements Canvas {
     $font .= ".afm";
     
     $this->_pdf->selectFont($font);
-    $this->_pdf->addText($x, $this->y($y) - Font_Metrics::get_font_height($font, $size), $size, $text, $angle, $adjust);
+    
+    //Font_Metrics::get_font_height($font, $size) ==
+    //$this->get_font_height($font, $size) ==
+    //$this->_pdf->selectFont($font),$this->_pdf->getFontHeight($size)
+    //- FontBBoxheight+FontHeightOffset, scaled to $size, in pt
+    //$this->_pdf->getFontDescender($size)
+    //- Descender scaled to size
+    //
+    //$this->_pdf->fonts[$this->_pdf->currentFont] sizes:
+    //['FontBBox'][0] left, ['FontBBox'][1] bottom, ['FontBBox'][2] right, ['FontBBox'][3] top
+    //Maximum extent of all glyphs of the font from the baseline point
+    //['Ascender'] maximum height above baseline except accents
+    //['Descender'] maximum depth below baseline, negative number means below baseline
+    //['FontHeightOffset'] manual enhancement of .afm files to trim windows fonts. currently not used.
+    //Values are in 1/1000 pt for a font size of 1 pt
+    //
+    //['FontBBox'][1] should be close to ['Descender'] 
+    //['FontBBox'][3] should be close to ['Ascender']+Accents
+    //in practice, FontBBox values are a little bigger
+    //
+    //The text position is referenced to the baseline, not to the lower corner of the FontBBox,
+    //for what the left,top corner is given.
+    //FontBBox spans also the background box for the text.
+    //If the lower corner would be used as reference point, the Descents of the glyphs would
+    //hang over the background box border.
+    //Therefore compensate only the extent above the Baseline.
+    //
+    //print '<pre>['.$font.','.$size.','.$this->_pdf->getFontHeight($size).','.$this->_pdf->getFontDescender($size).','.$this->_pdf->fonts[$this->_pdf->currentFont]['FontBBox'][3].','.$this->_pdf->fonts[$this->_pdf->currentFont]['FontBBox'][1].','.$this->_pdf->fonts[$this->_pdf->currentFont]['FontHeightOffset'].','.$this->_pdf->fonts[$this->_pdf->currentFont]['Ascender'].','.$this->_pdf->fonts[$this->_pdf->currentFont]['Descender'].']</pre>';
+    //
+    //$this->_pdf->addText($x, $this->y($y) - Font_Metrics::get_font_height($font, $size), $size, $text, $angle, $adjust);
+	//$this->_pdf->addText($x, $this->y($y) - $size, $size, $text, $angle, $adjust);    
+	//$this->_pdf->addText($x, $this->y($y) - $this->_pdf->getFontHeight($size)-$this->_pdf->getFontDescender($size), $size, $text, $angle, $adjust);
+	$this->_pdf->addText($x, $this->y($y) - ($this->_pdf->fonts[$this->_pdf->currentFont]['FontBBox'][3]*$size)/1000, $size, $text, $angle, $adjust);        
   }
 
   //........................................................................
