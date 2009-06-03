@@ -882,6 +882,7 @@ class Style {
       print '('.$this->_props["font_family"].'.'.$font_style.'.'.$this->__get("font_weight").'.'.$weight.'.'.$subtype.')';
     }
     $families = explode(",", $this->_props["font_family"]);
+    $families = array_map('trim',$families);
     reset($families);
 
     $font = null;
