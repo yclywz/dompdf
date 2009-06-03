@@ -727,7 +727,7 @@ class  Cpdf {
 
             $tmp = $o['info']['mediaBox'];
 
-            $res.= "\n/MediaBox [".sprintf('%.3f', $tmp[0]) .' '.sprintf('%.3f', $tmp[1]) .' '.sprintf('%.3f', $tmp[2]) .' '.sprintf('%.3f', $tmp[3]) .']';
+            $res.= "\n/MediaBox [".sprintf('%.3F', $tmp[0]) .' '.sprintf('%.3F', $tmp[1]) .' '.sprintf('%.3F', $tmp[2]) .' '.sprintf('%.3F', $tmp[3]) .']';
           }
         }
 
@@ -1611,7 +1611,7 @@ class  Cpdf {
 
       foreach($o['info']['rect'] as  $v) {
 
-        $res.=  sprintf("%.4f ", $v);
+        $res.=  sprintf("%.4F ", $v);
       }
 
       $res.= "]";
@@ -3152,7 +3152,7 @@ class  Cpdf {
 
     if  ($r >=  0 &&  ($force ||  $r !=  $this->currentColour['r'] ||  $g !=  $this->currentColour['g'] ||  $b !=  $this->currentColour['b'])) {
 
-      $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3f', $r) .' '.sprintf('%.3f', $g) .' '.sprintf('%.3f', $b) .' rg';
+      $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3F', $r) .' '.sprintf('%.3F', $g) .' '.sprintf('%.3F', $b) .' rg';
 
       $this->currentColour =  array('r' => $r, 'g' => $g, 'b' => $b);
     }
@@ -3166,7 +3166,7 @@ class  Cpdf {
 
     if  ($r >=  0 &&  ($force ||  $r !=  $this->currentStrokeColour['r'] ||  $g !=  $this->currentStrokeColour['g'] ||  $b !=  $this->currentStrokeColour['b'])) {
 
-      $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3f', $r) .' '.sprintf('%.3f', $g) .' '.sprintf('%.3f', $b) .' RG';
+      $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3F', $r) .' '.sprintf('%.3F', $g) .' '.sprintf('%.3F', $b) .' RG';
 
       $this->currentStrokeColour =  array('r' => $r, 'g' => $g, 'b' => $b);
     }
@@ -3257,7 +3257,7 @@ class  Cpdf {
   function  line($x1, $y1, $x2, $y2) {
 
     $this->objects[$this->currentContents]['c'] .=
-      "\n".sprintf('%.3f', $x1) .' '.sprintf('%.3f', $y1) .' m '.sprintf('%.3f', $x2) .' '.sprintf('%.3f', $y2) .' l S';
+      "\n".sprintf('%.3F', $x1) .' '.sprintf('%.3F', $y1) .' m '.sprintf('%.3F', $x2) .' '.sprintf('%.3F', $y2) .' l S';
   }
 
 
@@ -3269,10 +3269,10 @@ class  Cpdf {
     // in the current line style, draw a bezier curve from (x0,y0) to (x3,y3) using the other two points
     // as the control points for the curve.
     $this->objects[$this->currentContents]['c'] .=
-      "\n".sprintf('%.3f', $x0) .' '.sprintf('%.3f', $y0) .' m '.sprintf('%.3f', $x1) .' '.sprintf('%.3f', $y1);
+      "\n".sprintf('%.3F', $x0) .' '.sprintf('%.3F', $y0) .' m '.sprintf('%.3F', $x1) .' '.sprintf('%.3F', $y1);
 
     $this->objects[$this->currentContents]['c'] .=
-      ' '.sprintf('%.3f', $x2) .' '.sprintf('%.3f', $y2) .' '.sprintf('%.3f', $x3) .' '.sprintf('%.3f', $y3) .' c S';
+      ' '.sprintf('%.3F', $x2) .' '.sprintf('%.3F', $y2) .' '.sprintf('%.3F', $x3) .' '.sprintf('%.3F', $y3) .' c S';
   }
 
 
@@ -3336,8 +3336,8 @@ class  Cpdf {
       $a =  -1*deg2rad((float)$angle);
 
       $tmp  =  "\n q ";
-      $tmp .=  sprintf('%.3f', cos($a)) .' '.sprintf('%.3f', (-1.0*sin($a))) .' '.sprintf('%.3f', sin($a)) .' '.sprintf('%.3f', cos($a)) .' ';
-      $tmp .=  sprintf('%.3f', $x0) .' '.sprintf('%.3f', $y0) .' cm';
+      $tmp .=  sprintf('%.3F', cos($a)) .' '.sprintf('%.3F', (-1.0*sin($a))) .' '.sprintf('%.3F', sin($a)) .' '.sprintf('%.3F', cos($a)) .' ';
+      $tmp .=  sprintf('%.3F', $x0) .' '.sprintf('%.3F', $y0) .' cm';
 
       $this->objects[$this->currentContents]['c'].=  $tmp;
 
@@ -3353,7 +3353,7 @@ class  Cpdf {
     $d0 =  $r2 * cos($t1);
 
 
-    $this->objects[$this->currentContents]['c'] .=  "\n".sprintf('%.3f', $a0) .' '.sprintf('%.3f', $b0) .' m ';
+    $this->objects[$this->currentContents]['c'] .=  "\n".sprintf('%.3F', $a0) .' '.sprintf('%.3F', $b0) .' m ';
 
     for  ($i = 1; $i <=  $nSeg; $i++) {
 
@@ -3369,10 +3369,10 @@ class  Cpdf {
       $d1 =  $r2 * cos($t1);
 
       $this->objects[$this->currentContents]['c']
-        .=  "\n".sprintf('%.3f', ($a0+$c0*$dtm)) .' '.sprintf('%.3f', ($b0 + $d0 * $dtm));
+        .=  "\n".sprintf('%.3F', ($a0+$c0*$dtm)) .' '.sprintf('%.3F', ($b0 + $d0 * $dtm));
 
       $this->objects[$this->currentContents]['c'] .=
-        ' '.sprintf('%.3f', ($a1-$c1*$dtm)) .' '.sprintf('%.3f', ($b1-$d1*$dtm)) .' '.sprintf('%.3f', $a1) .' '.sprintf('%.3f', $b1) .' c';
+        ' '.sprintf('%.3F', ($a1-$c1*$dtm)) .' '.sprintf('%.3F', ($b1-$d1*$dtm)) .' '.sprintf('%.3F', $a1) .' '.sprintf('%.3F', $b1) .' c';
 
       $a0 =  $a1;
 
@@ -3468,11 +3468,11 @@ class  Cpdf {
 
     $this->objects[$this->currentContents]['c'].=  "\n";
 
-    $this->objects[$this->currentContents]['c'].=  sprintf('%.3f', $p[0]) .' '.sprintf('%.3f', $p[1]) .' m ';
+    $this->objects[$this->currentContents]['c'].=  sprintf('%.3F', $p[0]) .' '.sprintf('%.3F', $p[1]) .' m ';
 
     for  ($i =  2; $i < $np * 2; $i =  $i + 2) {
 
-      $this->objects[$this->currentContents]['c'].=  sprintf('%.3f', $p[$i]) .' '.sprintf('%.3f', $p[$i+1]) .' l ';
+      $this->objects[$this->currentContents]['c'].=  sprintf('%.3F', $p[$i]) .' '.sprintf('%.3F', $p[$i+1]) .' l ';
     }
 
     if  ($f ==  1) {
@@ -3491,7 +3491,7 @@ class  Cpdf {
    */
   function  filledRectangle($x1, $y1, $width, $height) {
 
-    $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3f', $x1) .' '.sprintf('%.3f', $y1) .' '.sprintf('%.3f', $width) .' '.sprintf('%.3f', $height) .' re f';
+    $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3F', $x1) .' '.sprintf('%.3F', $y1) .' '.sprintf('%.3F', $width) .' '.sprintf('%.3F', $height) .' re f';
   }
 
 
@@ -3501,7 +3501,7 @@ class  Cpdf {
    */
   function  rectangle($x1, $y1, $width, $height) {
 
-    $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3f', $x1) .' '.sprintf('%.3f', $y1) .' '.sprintf('%.3f', $width) .' '.sprintf('%.3f', $height) .' re S';
+    $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3F', $x1) .' '.sprintf('%.3F', $y1) .' '.sprintf('%.3F', $width) .' '.sprintf('%.3F', $height) .' re S';
   }
 
 
@@ -4141,7 +4141,7 @@ class  Cpdf {
 
     if  ($angle ==  0) {
 
-      $this->objects[$this->currentContents]['c'].=  "\n".'BT '.sprintf('%.3f', $x) .' '.sprintf('%.3f', $y) .' Td';
+      $this->objects[$this->currentContents]['c'].=  "\n".'BT '.sprintf('%.3F', $x) .' '.sprintf('%.3F', $y) .' Td';
 
     } else {
 
@@ -4149,9 +4149,9 @@ class  Cpdf {
 
       $tmp =  "\n".'BT ';
 
-      $tmp.=  sprintf('%.3f', cos($a)) .' '.sprintf('%.3f', (-1.0*sin($a))) .' '.sprintf('%.3f', sin($a)) .' '.sprintf('%.3f', cos($a)) .' ';
+      $tmp.=  sprintf('%.3F', cos($a)) .' '.sprintf('%.3F', (-1.0*sin($a))) .' '.sprintf('%.3F', sin($a)) .' '.sprintf('%.3F', cos($a)) .' ';
 
-      $tmp.=  sprintf('%.3f', $x) .' '.sprintf('%.3f', $y) .' Tm';
+      $tmp.=  sprintf('%.3F', $x) .' '.sprintf('%.3F', $y) .' Tm';
 
       $this->objects[$this->currentContents]['c'].=  $tmp;
     }
@@ -4160,7 +4160,7 @@ class  Cpdf {
 
       $this->wordSpaceAdjust =  $wordSpaceAdjust;
 
-      $this->objects[$this->currentContents]['c'].=  ' '.sprintf('%.3f', $wordSpaceAdjust) .' Tw';
+      $this->objects[$this->currentContents]['c'].=  ' '.sprintf('%.3F', $wordSpaceAdjust) .' Tw';
     }
 
     $len =  strlen($text);
@@ -4175,7 +4175,7 @@ class  Cpdf {
      // then we should write what we need to
      if ($i>$start){
      $part = substr($text,$start,$i-$start);
-     $this->objects[$this->currentContents]['c'] .= ' /F'.$this->currentFontNum.' '.sprintf('%.1f',$size).' Tf ';
+     $this->objects[$this->currentContents]['c'] .= ' /F'.$this->currentFontNum.' '.sprintf('%.1F',$size).' Tf ';
      $this->objects[$this->currentContents]['c'] .= ' ('.$this->filterText($part, false).') Tj';
      }
      if ($f){
@@ -4190,17 +4190,17 @@ class  Cpdf {
 
      // restart the text object
      if ($angle == 0){
-     $this->objects[$this->currentContents]['c'] .= "\n".'BT '.sprintf('%.3f',$xp).' '.sprintf('%.3f',$yp).' Td';
+     $this->objects[$this->currentContents]['c'] .= "\n".'BT '.sprintf('%.3F',$xp).' '.sprintf('%.3F',$yp).' Td';
      } else {
      $a = deg2rad((float)$angle);
      $tmp = "\n".'BT ';
-     $tmp .= sprintf('%.3f',cos($a)).' '.sprintf('%.3f',(-1.0*sin($a))).' '.sprintf('%.3f',sin($a)).' '.sprintf('%.3f',cos($a)).' ';
-     $tmp .= sprintf('%.3f',$xp).' '.sprintf('%.3f',$yp).' Tm';
+     $tmp .= sprintf('%.3F',cos($a)).' '.sprintf('%.3F',(-1.0*sin($a))).' '.sprintf('%.3F',sin($a)).' '.sprintf('%.3F',cos($a)).' ';
+     $tmp .= sprintf('%.3F',$xp).' '.sprintf('%.3F',$yp).' Tm';
      $this->objects[$this->currentContents]['c'] .= $tmp;
      }
      if ($wordSpaceAdjust != 0 || $wordSpaceAdjust != $this->wordSpaceAdjust){
      $this->wordSpaceAdjust = $wordSpaceAdjust;
-     $this->objects[$this->currentContents]['c'] .= ' '.sprintf('%.3f',$wordSpaceAdjust).' Tw';
+     $this->objects[$this->currentContents]['c'] .= ' '.sprintf('%.3F',$wordSpaceAdjust).' Tw';
      }
      }
      // and move the writing point to the next piece of text
@@ -4214,7 +4214,7 @@ class  Cpdf {
 
       $part =  $text; // OAR - Don't need this anymore, given that $start always equals zero.  substr($text, $start);
 
-      $this->objects[$this->currentContents]['c'].=  ' /F'.$this->currentFontNum.' '.sprintf('%.1f', $size) .' Tf ';
+      $this->objects[$this->currentContents]['c'].=  ' /F'.$this->currentFontNum.' '.sprintf('%.1F', $size) .' Tf ';
 
       $this->objects[$this->currentContents]['c'].=  ' ('.$this->filterText($part, false) .') Tj';
     }
@@ -5282,7 +5282,7 @@ class  Cpdf {
 
     $this->objects[$this->currentContents]['c'].=  "\nq";
 
-    $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3f', $w) ." 0 0 ".sprintf('%.3f', $h) ." ".sprintf('%.3f', $x) ." ".sprintf('%.3f', $y) ." cm";
+    $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3F', $w) ." 0 0 ".sprintf('%.3F', $h) ." ".sprintf('%.3F', $x) ." ".sprintf('%.3F', $y) ." cm";
 
     $this->objects[$this->currentContents]['c'].=  "\n/".$label.' Do';
 
@@ -5467,7 +5467,7 @@ class  Cpdf {
 
     $this->objects[$this->currentContents]['c'].=  "\nq";
 
-    $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3f', $w) ." 0 0 ".sprintf('%.3f', $h) ." ".sprintf('%.3f', $x) ." ".sprintf('%.3f', $y) ." cm";
+    $this->objects[$this->currentContents]['c'].=  "\n".sprintf('%.3F', $w) ." 0 0 ".sprintf('%.3F', $h) ." ".sprintf('%.3F', $x) ." ".sprintf('%.3F', $y) ." cm";
 
     $this->objects[$this->currentContents]['c'].=  "\n/".$label.' Do';
 
