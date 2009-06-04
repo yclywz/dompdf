@@ -1,5 +1,5 @@
 #labels Featured
- * handles most CSS2.1 properties & selectors, including @import, @media & @page rules (see here)
+ * handles most CSS2.1 properties & selectors, including @import, @media & @page rules ([CSSCompatibility see here])
  * supports most presentational HTML 4.0 attributes
  * supports external stylesheets, either on the local machine or through http/ftp (via fopen-wrappers)
  * supports complex tables, including row & column spans, separate & collapsed border models, individual cell styling, multi-page tables (no nested tables yet however)
