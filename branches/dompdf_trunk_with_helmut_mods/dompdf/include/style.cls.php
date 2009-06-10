@@ -68,6 +68,7 @@
  * - Restore lost change of default font of above
  * @version 20090610
  * - Allow absolute path from web server root as html image reference
+ * - More accurate handling of css property cache consistency
  */
 
 /* $Id: style.cls.php,v 1.22 2008-03-12 06:35:43 benjcarson Exp $ */
@@ -526,8 +527,14 @@ class Style {
         if ( isset($parent->_important_props[$prop]) ) {
           $this->_important_props[$prop] = true;
         }
-        //implicite assignment through __set, redirect to other ..._set function
+        //do not assign direct, but
+        //implicite assignment through __set, redirect to specialized, get value with __get
+        //This is for computing defaults if the parent setting is also missing.
+        //Therefore do not directly assign the value without __set
         //set _important_props before that to be able to propagate.
+        //see __set and __get, on all assignments clear cache!
+		//$this->_prop_cache[$prop] = null;
+		//$this->_props[$prop] = $parent->_props[$prop];
         //props_set for more obvious explicite assignment not implemented, because
         //too many implicite uses.
         // $this->props_set($prop, $parent->$prop);
@@ -815,7 +822,7 @@ class Style {
     if ( !isset(self::$_defaults[$prop]) ) 
       throw new DOMPDF_Exception("'$prop' is not a valid CSS2 property.");
 
-    if ( isset($this->_prop_cache[$prop]) )
+    if ( isset($this->_prop_cache[$prop]) && $this->_prop_cache[$prop] != null)
       return $this->_prop_cache[$prop];
     
     $method = "get_$prop";
@@ -1474,7 +1481,7 @@ class Style {
       $col = self::$_defaults["color"];
 
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["color"] = null;
+	$this->_prop_cache["color"] = null;
     $this->_props["color"] = $col["hex"];
   }
 
@@ -1490,7 +1497,7 @@ class Style {
       $col = self::$_defaults["background_color"];
 
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["background_color"] = null;
+	$this->_prop_cache["background_color"] = null;
     $this->_props["background_color"] = is_array($col) ? $col["hex"] : $col;
   }
 
@@ -1502,7 +1509,7 @@ class Style {
    */
   function set_background_image($val) {
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["background_image"] = null;
+	$this->_prop_cache["background_image"] = null;
     $this->_props["background_image"] = $this->_image($val);
   }
 
@@ -1516,15 +1523,8 @@ class Style {
     if ( is_null($val) )
       $val = self::$_defaults["background_repeat"];
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-    //$this->_prop_cache["background_repeat"] = null;
+    $this->_prop_cache["background_repeat"] = null;
     $this->_props["background_repeat"] = $val;
-
-
-
-
-
-
-
   }
 
   /**
@@ -1538,7 +1538,7 @@ class Style {
       $val = self::$_defaults["background_attachment"];
 
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["background_attachment"] = null;
+	$this->_prop_cache["background_attachment"] = null;
     $this->_props["background_attachment"] = $val;
   }
 
@@ -1553,7 +1553,7 @@ class Style {
       $val = self::$_defaults["background_position"];
 
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["background_position"] = null;
+	$this->_prop_cache["background_position"] = null;
     $this->_props["background_position"] = $val;
   }
 
@@ -1585,7 +1585,7 @@ class Style {
  	  $this->_set_style("background_position",implode(' ',$pos), $important);
  	}
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["background"] = null;
+	$this->_prop_cache["background"] = null;
  	$this->_props["background"] = $val;
   }
 
@@ -1600,7 +1600,7 @@ class Style {
   function set_font_size($size) {
     $this->__font_size_calculated = false;
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["font_size"] = null;
+	$this->_prop_cache["font_size"] = null;
     $this->_props["font_size"] = $size;
   }
 
@@ -1631,7 +1631,7 @@ class Style {
   function set_font($val) {
     $this->__font_size_calculated = false;
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["font"] = null;
+	$this->_prop_cache["font"] = null;
  	$this->_props["font"] = $val;
 
     $important = isset($this->_important_props["font"]);
@@ -1692,7 +1692,7 @@ class Style {
       $break = "always";
 
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["page_break_before"] = null;
+	$this->_prop_cache["page_break_before"] = null;
     $this->_props["page_break_before"] = $break;
   }
 
@@ -1701,7 +1701,7 @@ class Style {
       $break = "always";
 
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["page_break_after"] = null;
+	$this->_prop_cache["page_break_after"] = null;
     $this->_props["page_break_after"] = $break;
   }
   /**#@-*/
@@ -1813,7 +1813,7 @@ class Style {
     $this->_set_border("bottom", $val, $important);
     $this->_set_border("left", $val, $important);
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["border"] = null;
+	$this->_prop_cache["border"] = null;
     $this->_props["border"] = $val;
   }
 
@@ -1845,7 +1845,7 @@ class Style {
       $arr[1] = $arr[0];
 
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["border_spacing"] = null;
+	$this->_prop_cache["border_spacing"] = null;
     $this->_props["border_spacing"] = $arr[0] . " " . $arr[1];
   }
 
@@ -1857,7 +1857,7 @@ class Style {
    */
   function set_list_style_image($val) {
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["list_style_image"] = null;
+	$this->_prop_cache["list_style_image"] = null;
     $this->_props["list_style_image"] = $this->_image($val);
   }
 
@@ -1904,7 +1904,7 @@ class Style {
     }
 
     //see __set and __get, on all assignments clear cache, not needed on direct set through __set
-	//$this->_prop_cache["list_style"] = null;
+	$this->_prop_cache["list_style"] = null;
  	$this->_props["list_style"] = $val;
   }
 

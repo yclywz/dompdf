@@ -33,17 +33,20 @@
  * @link http://www.digitaljunkies.ca/dompdf
  * @copyright 2004 Benj Carson
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @package dompdf
  * @version 0.5.1
  *
  * Changes
- * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version 0.5.1.htischer.20090507
  * - Specifity of css selector chain was too small because leading whitespace
  *   to be counted as number of elements was removed
  * - On parsing css properties accept and register !important attribute
  * - Add optional debug output
-
+ * @version 20090610
+ * - _parse_properties on style property name and value remove augmenting superflous
+ *   space for consistent parsing, in particular combined values like background
  */
 
 /* $Id: stylesheet.cls.php,v 1.19 2008-03-12 06:35:43 benjcarson Exp $ */
@@ -904,8 +907,8 @@ class Stylesheet {
         continue;
       }
 
-      $prop_name = mb_strtolower(mb_substr($prop, 0, $i));
-      $value = mb_substr($prop, $i+1);
+      $prop_name = rtrim(mb_strtolower(mb_substr($prop, 0, $i)));
+      $value = ltrim(mb_substr($prop, $i+1));
       if (DEBUGCSS) print $prop_name.':='.$value.($important?'!IMPORTANT':'').')';
       //New style, anyway empty
       //if ($important || !$style->important_get($prop_name) ) {
