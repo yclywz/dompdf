@@ -41,6 +41,8 @@
  * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version dompdf_trunk_with_helmut_mods.20090528
  * - fix text decoration positions according to font metrics
+ * @version 20090610
+ * - better accuracy on using different renderer as cpdf, added comments
  */
 
 /* $Id: text_renderer.cls.php,v 1.8 2008-03-12 06:35:43 benjcarson Exp $ */
@@ -51,13 +53,18 @@
  * @package dompdf
  */
 class Text_Renderer extends Abstract_Renderer {
+  
+  const DECO_THICKNESS = 0.04;     // Thickness of underline. Screen: 0.08, print: better less, e.g. 0.04
 
+  //Tweaking if $base and $descent are not accurate.
+  //Check method_exists( $this->_canvas, "get_cpdf" )
+  //- For cpdf these can and must stay 0, because font metrics are used directly.
+  //- For other renderers, if different values are wanted, separate the parameter sets.
+  //  But $size and $size-$height seem to be accurate enough
   const UNDERLINE_OFFSET = 0.0;    // Relative to bottom of text, as fraction of height.
   const OVERLINE_OFFSET = 0.0;    // Relative to top of text
   const LINETHROUGH_OFFSET = 0.0; // Relative to centre of text.
   const DECO_EXTENSION = 0.0;     // How far to extend lines past either end, in pt
-  
-  const DECO_THICKNESS = 0.04;     // Thickness of underline. Screen: 0.08, print: better less, e.g. 0.04
     
   //........................................................................
 
@@ -97,8 +104,10 @@ class Text_Renderer extends Abstract_Renderer {
       $descent = ($this->_canvas->get_cpdf()->fonts[$this->_canvas->get_cpdf()->currentFont]['FontBBox'][1]*$size)/1000;
       //print '<pre>Text_Renderer cpdf:'.$base.' '.$descent.' '.$size.'</pre>';
     } else {
+      //Descent is font part below baseline, typically negative. $height is about full height of font box.
+      //$descent = -$size/6; is less accurate, depends on font family.
       $base = $size;
-      $descent = -$size/4;
+      $descent = $size-$height;
       //print '<pre>Text_Renderer other than cpdf:'.$base.' '.$descent.' '.$size.'</pre>';
     }
     
