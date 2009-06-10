@@ -33,15 +33,20 @@
  * @link http://www.digitaljunkies.ca/dompdf
  * @copyright 2004 Benj Carson
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @package dompdf
  * @version 0.5.1
  *
  * Changes
- * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version 0.5.1.htischer.20090507
  * - trailing slash of base_path in build_url is no longer optional when
  *   required. This allows paths not ending in a slash, e.g. on dynamically
  *   created sites with page id in the url parameters.
+ * @version 20090601
+ * - fix windows paths 
+ * @version 20090610
+ * - relax windows path syntax, use uniform path delimiter. Used for background images.
  */
 
 /* $Id: functions.inc.php,v 1.17 2007-08-22 23:02:07 benjcarson Exp $ */
@@ -123,22 +128,24 @@ function build_url($protocol, $host, $base_path, $url) {
   $ret = $protocol;
 
   if (!in_array(mb_strtolower($protocol), array("http://", "https://", "ftp://", "ftps://"))) {
-    //On Windows local file, an abs path can begin also with a '\' or a drive letter
-    if ($url{0} !== '/' && (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' || $url{0} == '\\' || $url{1} !== ':' || ($url{2}!=='\\' && $url{2}!=='/'))) {
-      // We ignore the host for local file access, and run the path through
-      // realpath()
+    //On Windows local file, an abs path can begin also with a '\' or a drive letter and colon
+    //drive: followed by a relative path would be a drive specific default folder.
+    //not known in php app code, treat as abs path 
+    //($url{1} !== ':' || ($url{2}!=='\\' && $url{2}!=='/'))
+    if ($url{0} !== '/' && (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' || ($url{0} != '\\' && $url{1} !== ':'))) {
+      // For rel path and local acess we ignore the host, and run the path through realpath()
       $ret .= dompdf_realpath($base_path).'/';
     }
     $ret .= $url; 
     return $ret;
   }
 
-  if ( $url{0} === '/' ) {
+  //remote urls with backslash in html/css are not really correct, but lets be genereous
+  if ( $url{0} === '/' || $url{0} === '\\' ) {
     // Absolute path
     $ret .= $host . $url;
   } else {
     // Relative path
-
     //$base_path = $base_path !== "" ? rtrim($base_path, "/\\") . "/" : "";
     $ret .= $host . $base_path . $url;
   }
@@ -311,6 +318,7 @@ function dompdf_realpath($path) {
   } else if ($path{0} != '/') {
     $path = getcwd() . DIRECTORY_SEPARATOR . $path;
   }
+  $path = strtr( $path, DIRECTORY_SEPARATOR == "\\" ? "/" : DIRECTORY_SEPARATOR , DIRECTORY_SEPARATOR);
  
   $parts = explode(DIRECTORY_SEPARATOR, $path);
   $path = array();
