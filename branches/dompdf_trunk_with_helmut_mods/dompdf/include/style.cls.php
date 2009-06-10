@@ -65,7 +65,9 @@
  * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version dompdf_trunk_with_helmut_mods.20090524
  * - Allow superflous white space and string delimiter in font search path.
- *   Restore lost change of default font of above
+ * - Restore lost change of default font of above
+ * @version 20090610
+ * - Allow absolute path from web server root as html image reference
  */
 
 /* $Id: style.cls.php,v 1.22 2008-03-12 06:35:43 benjcarson Exp $ */
@@ -1421,21 +1423,38 @@ class Style {
   }
 
   protected function _image($val) {
+    $DEBUGCSS=DEBUGCSS;
+    
     if ( mb_strpos($val, "url") === false ) {
-      return "none"; //Don't resolve no image -> otherwise would prefix path and no longer recognize as none
+      $path = "none"; //Don't resolve no image -> otherwise would prefix path and no longer recognize as none
     }
+    else {
+      $val = preg_replace("/url\(['\"]?([^'\")]+)['\"]?\)/","\\1", trim($val));
 
-    $val = preg_replace("/url\(['\"]?([^'\")]+)['\"]?\)/","\\1", trim($val));
-
-    // Resolve the url now in the context of the current stylesheet
-    $parsed_url = explode_url($val);
-    if ( $parsed_url["protocol"] == "" && $this->_stylesheet->get_protocol() == "" )
-      return dompdf_realpath($this->_stylesheet->get_base_path() . $parsed_url["file"]);
-    else
-      return build_url($this->_stylesheet->get_protocol(),
-                       $this->_stylesheet->get_host(),
-                       $this->_stylesheet->get_base_path(),
-                       $val);
+      // Resolve the url now in the context of the current stylesheet
+      $parsed_url = explode_url($val);
+      if ( $parsed_url["protocol"] == "" && $this->_stylesheet->get_protocol() == "" ) {
+        if ($parsed_url["path"]{0} == '/' || $parsed_url["path"]{0} == '\\' ) {
+          $path = $_SERVER["DOCUMENT_ROOT"].'/';
+        } else {
+          $path = $this->_stylesheet->get_base_path();
+        }
+        $path .= $parsed_url["path"] . $parsed_url["file"];
+        $path = dompdf_realpath($path);
+      } else {
+        $path = build_url($this->_stylesheet->get_protocol(),
+                          $this->_stylesheet->get_host(),
+                          $this->_stylesheet->get_base_path(),
+                          $val);
+      }
+    }
+    if ($DEBUGCSS) {
+      print "<pre>[_image\n";
+      print_r($parsed_url);
+      print $this->_stylesheet->get_protocol()."\n".$this->_stylesheet->get_base_path()."\n".$path."\n";
+      print "_image]</pre>";;
+    }
+    return $path;
   }
 
 /*======================*/
