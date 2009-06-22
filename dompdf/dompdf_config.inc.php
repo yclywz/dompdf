@@ -53,7 +53,6 @@
 /* $Id: dompdf_config.inc.php,v 1.30 2009-04-29 04:11:35 benjcarson Exp $ */
 
 //error_reporting(E_STRICT | E_ALL);
-error_reporting(E_STRICT | E_ALL);
 
 /**
  * The root of your DOMPDF installation
