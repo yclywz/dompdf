@@ -33,11 +33,12 @@
  * @link http://www.digitaljunkies.ca/dompdf
  * @copyright 2004 Benj Carson
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @package dompdf
  * @version 0.5.1
  *
  * Changes
- * @author Helmut Tischer <htischer@weihenstephan.org>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version 0.5.1.htischer.20090507
  * - On missing font on explicite font selection don't change subtype and don't return default font.
  * - On requesting default font and missing subtype, check similar subtypes, then any subtype, then normal. The last must exist.
