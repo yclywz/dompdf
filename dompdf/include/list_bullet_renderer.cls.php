@@ -33,8 +33,14 @@
  * @link http://www.digitaljunkies.ca/dompdf
  * @copyright 2004 Benj Carson
  * @author Benj Carson <benjcarson@digitaljunkies.ca>
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @package dompdf
  * @version 0.5.1
+ *
+ * Changes
+ * @contributor Helmut Tischer <htischer@weihenstephan.org>
+ * @version 20090622
+ * - bullet size proportional to font size, center position
  */
 
 /* $Id: list_bullet_renderer.cls.php,v 1.7 2006-10-26 17:07:23 benjcarson Exp $ */
@@ -45,6 +51,37 @@
  * @access private
  * @package dompdf
  */
+/*
+class Inline_Positioner extends Positioner {
+
+  function __construct(Frame_Decorator $frame) { parent::__construct($frame); }
+
+  //........................................................................
+
+  function position() {
+    $cb = $this->_frame->get_containing_block();
+
+    // Find our nearest block level parent and access its lines property.
+    $p = $this->_frame->find_block_parent();
+
+    // Debugging code:
+
+//     pre_r("\nPositioning:");
+//     pre_r("Me: " . $this->_frame->get_node()->nodeName . " (" . (string)$this->_frame->get_node() . ")");
+//     pre_r("Parent: " . $p->get_node()->nodeName . " (" . (string)$p->get_node() . ")");
+
+    // End debugging
+
+    if ( !$p )
+      throw new DOMPDF_Exception("No block-level parent found.  Not good.");
+
+    $line = $p->get_current_line();
+    
+    $this->_frame->set_position($cb["x"] + $line["w"], $line["y"]);
+
+  }
+}
+*/
 class List_Bullet_Renderer extends Abstract_Renderer {
 
   //........................................................................
@@ -52,23 +89,25 @@ class List_Bullet_Renderer extends Abstract_Renderer {
   function render(Frame $frame) {
 
     $style = $frame->get_style();
+    $font_size = $style->get_font_size();
     $line_height = $style->length_in_pt($style->line_height, $frame->get_containing_block("w"));
 
     // Handle list-style-image
-    if ( $style->list_style_image != "none" ) {
+    // If list style image is requested but missing, fall back to predefined types
+    if ( $style->list_style_image != "none" &&
+         strcmp($img = $frame->get_image_url(), DOMPDF_LIB_DIR . "/res/broken_image.png") != 0) {
 
       list($x,$y) = $frame->get_position();
       $w = $frame->get_width();
       $h = $frame->get_height();
-      $x += $w / 2;
-      $y += $line_height / 2 - $h / 2;
+      $x += $w/2; //Todo: Image seem not to be positioned top right, but top center. Why?
+      $y -= ($line_height - $font_size)/2; //Reverse hinting of list_bullet_positioner
 
-      $this->_canvas->image( $frame->get_image_url(), $frame->get_image_ext(), $x, $y, $w, $h);
+      $this->_canvas->image( $img, $frame->get_image_ext(), $x, $y, $w, $h);
 
     } else {
 
       $bullet_style = $style->list_style_type;
-      $bullet_size = List_Bullet_Frame_Decorator::BULLET_SIZE;
 
       $fill = false;
 
@@ -79,21 +118,19 @@ class List_Bullet_Renderer extends Abstract_Renderer {
         $fill = true;
 
       case "circle":
-        if ( !$fill )
-          $fill = false;
-
         list($x,$y) = $frame->get_position();
-        //$x += $bullet_size / 2 + List_Bullet_Frame_Decorator::BULLET_PADDING;
-        $y += $line_height - $bullet_size;
-        $r = $bullet_size / 2;
-        $this->_canvas->circle($x, $y, $r, $style->color, 0.2, null, $fill);
+        $r = ($font_size*(List_Bullet_Frame_Decorator::BULLET_SIZE /*-List_Bullet_Frame_Decorator::BULLET_THICKNESS*/ ))/2;
+        $x -= $font_size*(List_Bullet_Frame_Decorator::BULLET_SIZE/2);
+        $y += ($font_size*(1-List_Bullet_Frame_Decorator::BULLET_DESCENT))/2;
+        $o = $font_size*List_Bullet_Frame_Decorator::BULLET_THICKNESS;
+        $this->_canvas->circle($x, $y, $r, $style->color, $o, null, $fill);
         break;
 
       case "square":
         list($x, $y) = $frame->get_position();
-        $w = $bullet_size;
-        $x -= $w/2;
-        $y += $line_height - $w;
+        $w = $font_size*List_Bullet_Frame_Decorator::BULLET_SIZE;
+        $x -= $w;
+        $y += ($font_size*(1-List_Bullet_Frame_Decorator::BULLET_DESCENT-List_Bullet_Frame_Decorator::BULLET_SIZE))/2;
         $this->_canvas->filled_rectangle($x, $y, $w, $w, $style->color);
         break;
 
