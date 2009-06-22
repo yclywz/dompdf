@@ -47,6 +47,8 @@
  * @contributor Helmut Tischer <htischer@weihenstephan.org>
  * @version dompdf_trunk_with_helmut_mods.20090524
  * - Made debug messages more individually configurable
+ * @version 20090622
+ * - don't cache broken image, but refer to original broken image replacement
  */
 
 /* $Id */
@@ -119,12 +121,14 @@ class Image_Cache {
         restore_error_handler();
 
         if ( strlen($image) == 0 ) {
-          $image = file_get_contents(DOMPDF_LIB_DIR . "/res/broken_image.png");
+          //target image not found
+          $resolved_url = DOMPDF_LIB_DIR . "/res/broken_image.png";
+          $ext = "png";
 
           //debugpng
           if ($DEBUGPNG) $full_url_dbg = $full_url.'(missing)';
 
-        }
+        } else {
 
         file_put_contents($resolved_url, $image);
 
@@ -136,15 +140,27 @@ class Image_Cache {
         //Therefore get image type from the content
 
         $imagedim = getimagesize($resolved_url);
+        if( $imagedim[2] >= 1 && $imagedim[2] <=3 && $imagedim[0] && $imagedim[1] ) {
+        //target image is valid
+
         $imagetypes = array('','gif','jpeg','png','swf');
-
         $ext = $imagetypes[$imagedim[2]];
-
         if ( rename($resolved_url,$resolved_url.'.'.$ext) ) {
           $resolved_url .= '.'.$ext;
         }
-
+ 
+ 		//Don't put replacement image into cache - otherwise it will be deleted on cache cleanup.
+ 		//Only execute on successfull caching of remote image.       
         self::$_cache[$full_url] = array($resolved_url,$ext);
+
+        } else {
+          //target image is not valid.
+          $unlink($resolved_url);
+          
+          $resolved_url = DOMPDF_LIB_DIR . "/res/broken_image.png";
+          $ext = "png";
+        }
+        }
 
       }
 
