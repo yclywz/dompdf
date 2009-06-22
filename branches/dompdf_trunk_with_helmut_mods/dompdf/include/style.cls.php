@@ -1891,6 +1891,11 @@ class Style {
         continue;
       }
 
+      //On setting or merging or inheriting list_style_image as well as list_style_type,
+      //and url exists, then url has precedence, otherwise fall back to list_style_type
+      //Firefox is wrong here (list_style_image gets overwritten on explicite list_style_type)
+      //Internet Explorer 7/8 and dompdf is right.
+       
 	  if (mb_substr($value, 0, 3) == "url") {
    	    $this->_set_style("list_style_image", $this->_image($value), $important);
         continue;
