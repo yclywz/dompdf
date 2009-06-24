@@ -74,11 +74,16 @@ class List_Bullet_Frame_Decorator extends Frame_Decorator {
     return $this->_frame->get_style()->get_font_size()*self::BULLET_SIZE + 2 * self::BULLET_PADDING;
   }
 
+  //hits only on "inset" lists items, to increase hight of box
   function get_margin_height() {
     return $this->_frame->get_style()->get_font_size()*self::BULLET_SIZE + 2 * self::BULLET_PADDING;
   }
 
   function get_width() {
+    return $this->_frame->get_style()->get_font_size()*self::BULLET_SIZE + 2 * self::BULLET_PADDING;
+  }
+  
+  function get_height() {
     return $this->_frame->get_style()->get_font_size()*self::BULLET_SIZE + 2 * self::BULLET_PADDING;
   }
   
