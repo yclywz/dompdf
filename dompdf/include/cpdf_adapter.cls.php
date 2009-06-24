@@ -205,7 +205,7 @@ class CPDF_Adapter implements Canvas {
     if ( is_array($paper) )
       $size = $paper;
     else if ( isset(self::$PAPER_SIZES[mb_strtolower($paper)]) )
-      $size = self::$PAPER_SIZES[$paper];
+      $size = self::$PAPER_SIZES[mb_strtolower($paper)];
     else
       $size = self::$PAPER_SIZES["letter"];
 
