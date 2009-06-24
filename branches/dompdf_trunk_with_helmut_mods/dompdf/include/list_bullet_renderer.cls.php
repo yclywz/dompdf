@@ -51,37 +51,6 @@
  * @access private
  * @package dompdf
  */
-/*
-class Inline_Positioner extends Positioner {
-
-  function __construct(Frame_Decorator $frame) { parent::__construct($frame); }
-
-  //........................................................................
-
-  function position() {
-    $cb = $this->_frame->get_containing_block();
-
-    // Find our nearest block level parent and access its lines property.
-    $p = $this->_frame->find_block_parent();
-
-    // Debugging code:
-
-//     pre_r("\nPositioning:");
-//     pre_r("Me: " . $this->_frame->get_node()->nodeName . " (" . (string)$this->_frame->get_node() . ")");
-//     pre_r("Parent: " . $p->get_node()->nodeName . " (" . (string)$p->get_node() . ")");
-
-    // End debugging
-
-    if ( !$p )
-      throw new DOMPDF_Exception("No block-level parent found.  Not good.");
-
-    $line = $p->get_current_line();
-    
-    $this->_frame->set_position($cb["x"] + $line["w"], $line["y"]);
-
-  }
-}
-*/
 class List_Bullet_Renderer extends Abstract_Renderer {
 
   //........................................................................
@@ -98,9 +67,18 @@ class List_Bullet_Renderer extends Abstract_Renderer {
          strcmp($img = $frame->get_image_url(), DOMPDF_LIB_DIR . "/res/broken_image.png") != 0) {
 
       list($x,$y) = $frame->get_position();
-      $w = $frame->get_width();
-      $h = $frame->get_height();
-      $x += $w/2; //Todo: Image seem not to be positioned top right, but top center. Why?
+      
+      //For expected size and aspect, instead of box size, use image natural size scaled to DPI.
+      // Resample the bullet image to be consistent with 'auto' sized images
+      // See also Image_Frame_Reflower::get_min_max_width
+      // Tested php ver: value measured in px, suffix "px" not in value: rtrim unnecessary.
+      //$w = $frame->get_width();
+      //$h = $frame->get_height();
+      list($width, $height) = getimagesize($img);
+      $w = (((float)rtrim($width, "px")) * 72) / DOMPDF_DPI;
+      $h = (((float)rtrim($height, "px")) * 72) / DOMPDF_DPI;
+      
+      $x -= $w;
       $y -= ($line_height - $font_size)/2; //Reverse hinting of list_bullet_positioner
 
       $this->_canvas->image( $img, $frame->get_image_ext(), $x, $y, $w, $h);
@@ -132,6 +110,9 @@ class List_Bullet_Renderer extends Abstract_Renderer {
         $x -= $w;
         $y += ($font_size*(1-List_Bullet_Frame_Decorator::BULLET_DESCENT-List_Bullet_Frame_Decorator::BULLET_SIZE))/2;
         $this->_canvas->filled_rectangle($x, $y, $w, $w, $style->color);
+        break;
+      
+      case "none":
         break;
 
       }

@@ -81,7 +81,8 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
    * @param DOMPDF $dompdf the document's dompdf object
    */
   function __construct(Frame $frame, DOMPDF $dompdf) {
-    $url = $frame->get_style()->list_style_image;
+    $style = $frame->get_style();
+    $url = $style->list_style_image;
     $frame->get_node()->setAttribute("src", $url);
     $this->_img = new Image_Frame_Decorator($frame, $dompdf);
     parent::__construct($this->_img, $dompdf);
@@ -92,7 +93,18 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
     // Tested php ver: value measured in px, suffix "px" not in value: rtrim unnecessary.
     $this->_width = (((float)rtrim($width, "px")) * 72) / DOMPDF_DPI;
     $this->_height = (((float)rtrim($height, "px")) * 72) / DOMPDF_DPI;
-
+ 
+    //If an image is taller as the containing block/box, the box should be extended.
+    //Neighbour elements are overwriting the overlapping image areas.
+    //Todo: Where can the box size be extended?   
+    //Code below has no effect.
+    //See block_frame_reflower _calculate_restricted_height
+    //See generated_frame_reflower, Dompdf:render() "list-item", "-dompdf-list-bullet"S.
+    //Leave for now    
+    //if ($style->min_height < $this->_height ) {
+    //  $style->min_height = $this->_height;
+    //}
+    //$style->height = "auto";   
   }
 
   /**
@@ -101,7 +113,11 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
    * @return int
    */
   function get_width() {
-    return $this->_width;
+    //ignore image width, use same width as on predefined bullet List_Bullet_Frame_Decorator
+    //for proper alignment of text. Allow image to not fitting on left border. 
+    //return $this->_width;
+    return $this->_frame->get_style()->get_font_size()*List_Bullet_Frame_Decorator::BULLET_SIZE + 
+      2 * List_Bullet_Frame_Decorator::BULLET_PADDING;
   }
 
   /**
@@ -110,6 +126,7 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
    * @return int
    */
   function get_height() {
+    //based on image height
     return $this->_height;
   }
   
@@ -119,7 +136,15 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
    * @return int
    */
   function get_margin_width() {
-    return $this->_width + List_Bullet_Frame_Decorator::BULLET_PADDING;
+    //ignore image width, use same width as on predefined bullet List_Bullet_Frame_Decorator
+    //for proper alignment of text. Allow image to not fitting on left border. 
+    //return $this->_width + List_Bullet_Frame_Decorator::BULLET_PADDING;
+
+    // Small hack to prevent indenting of list text
+    if ( $this->_frame->get_style()->list_style_position == "outside" )
+      return 0;
+    return $this->_frame->get_style()->get_font_size()*List_Bullet_Frame_Decorator::BULLET_SIZE + 
+      2 * List_Bullet_Frame_Decorator::BULLET_PADDING;
   }
 
   /**
@@ -128,7 +153,8 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
    * @return int
    */
   function get_margin_height() {
-    return $this->_height + List_Bullet_Frame_Decorator::BULLET_PADDING;
+    //based on image height
+    return $this->_height + 2 * List_Bullet_Frame_Decorator::BULLET_PADDING;
   }
 
   /**
