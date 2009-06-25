@@ -295,4 +295,18 @@ sanctus est Lorem ipsum dolor sit amet.</li>
 </ul>
 </ul>
 
+<h1>combined list attributes list-style</h1>
+
+<ul style="list-style:square inside url(dummy.png);">
+ <li>list-style:square inside url(dummy.png);</li>
+ <li style="list-style-position:outside;">list-style:outside;[overwrites only position]</li>
+</ul>
+<ul style="list-style:square inside url(images/png.png);">
+ <li>list-style:square inside url(images/png.png);</li>
+ <li style="list-style-position:outside;">list-style-position:outside;[overwrites only position]</li>
+ <li style="list-style:outside;">list-style-position:outside;[overwrite attributes - firefox3: all; dompdf, internet explorer 8: only position]</li>
+ <li style="list-style:none;">list-style:none; [resets both, bullet and image]</li>
+</ul>
+
+
 </body> </html>
