@@ -68,13 +68,16 @@ class List_Bullet_Frame_Decorator extends Frame_Decorator {
   }
   
   function get_margin_width() {
-    // Small hack to prevent indenting of list text
-    if ( $this->_frame->get_style()->list_style_position == "outside" )
+    $style = $this->_frame->get_style();
+    // Small hack to prevent extra indenting of list text on list_style_position == "inside"
+    // and on suppressed bullet
+    if ( $style->list_style_position == "outside" ||
+         $style->list_style_type == "none" )
       return 0;
-    return $this->_frame->get_style()->get_font_size()*self::BULLET_SIZE + 2 * self::BULLET_PADDING;
+    return $style->get_font_size()*self::BULLET_SIZE + 2 * self::BULLET_PADDING;
   }
 
-  //hits only on "inset" lists items, to increase hight of box
+  //hits only on "inset" lists items, to increase height of box
   function get_margin_height() {
     return $this->_frame->get_style()->get_font_size()*self::BULLET_SIZE + 2 * self::BULLET_PADDING;
   }
