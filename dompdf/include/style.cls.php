@@ -860,7 +860,7 @@ class Style {
     
     if ( is_numeric($weight) ) {
 
-      if ( $weight < 700 )
+      if ( $weight < 600 )
         $weight = "normal";
       else
         $weight = "bold";
@@ -876,11 +876,11 @@ class Style {
     // Resolve font-style
     $font_style = $this->__get("font_style");
 
-    if ( $weight == "bold" && $font_style == "italic" )
+    if ( $weight == "bold" && ($font_style == "italic" || $font_style == "oblique") )
       $subtype = "bold_italic";
-    else if ( $weight == "bold" && $font_style != "italic" )
+    else if ( $weight == "bold" && $font_style != "italic" && $font_style != "oblique" )
       $subtype = "bold";
-    else if ( $weight != "bold" && $font_style == "italic" )
+    else if ( $weight != "bold" && ($font_style == "italic" || $font_style == "oblique") )
       $subtype = "italic";
     else
       $subtype = "normal";
