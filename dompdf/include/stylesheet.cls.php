@@ -131,9 +131,19 @@ class Stylesheet {
 
   /**
    * accepted CSS media types
+   * List of types and parsing rules for future extensions:
+   * http://www.w3.org/TR/REC-html40/types.html
+   *   screen, tty, tv, projection, handheld, print, braille, aural, all
+   * The following are non standard extensions for undocumented specific environments.
+   *   static, visual, bitmap, paged
+   * Note, even though the generated pdf file is intended for print output,
+   * the desired content might be different (e.g. screen or projection view of html file).
+   * Therefore allow specification of content by dompdf setting DOMPDF_DEFAULT_MEDIA_TYPE.
+   * If given, replace media "print" by DOMPDF_DEFAULT_MEDIA_TYPE.
+   * (Previous version $ACCEPTED_MEDIA_TYPES = $ACCEPTED_GENERIC_MEDIA_TYPES + $ACCEPTED_DEFAULT_MEDIA_TYPE)
    */
-  static $ACCEPTED_MEDIA_TYPES = array("all", "static", "visual",
-                                       "bitmap", "paged", "print");
+  static $ACCEPTED_DEFAULT_MEDIA_TYPE = "print";
+  static $ACCEPTED_GENERIC_MEDIA_TYPES = array("all", "static", "visual", "bitmap", "paged");
 
   /**
    * The class constructor.
@@ -623,11 +633,9 @@ class Stylesheet {
     $root_flg = false;
     foreach ($tree->get_frames() as $frame) {
       // pre_r($frame->get_node()->nodeName . ":");
-
       if ( !$root_flg && $this->_page_style ) {
         $style = $this->_page_style;
         $root_flg = true;
-
       } else
         $style = $this->create_style();
 
@@ -780,12 +788,37 @@ class Stylesheet {
           break;
 
         case "media":
-          if ( in_array(mb_strtolower(trim($match[3])), self::$ACCEPTED_MEDIA_TYPES ) ) {
+          $acceptedmedia = self::$ACCEPTED_GENERIC_MEDIA_TYPES;
+          if ( defined("DOMPDF_DEFAULT_MEDIA_TYPE") ) {
+            $acceptedmedia[] = DOMPDF_DEFAULT_MEDIA_TYPE;
+          } else {
+            $acceptedmedia[] = self::$ACCEPTED_DEFAULT_MEDIA_TYPE; 
+          }
+          if ( in_array(mb_strtolower(trim($match[3])), $acceptedmedia ) ) {
             $this->_parse_sections($match[5]);
           }
           break;
 
         case "page":
+          //This handles @page to be applied to page oriented media
+          //Note: This has a reduced syntax:
+          //@page { margin:1cm; color:blue; }
+          //Not a sequence of styles like a full.css, but only the properties
+          //of a single style, which is applied to the very first "root" frame before
+          //processing other styles of the frame.
+          //Working properties:
+          // margin (for margin around edge of paper)
+          // font-family (default font of pages)
+          // color (default text color of pages)
+          //Non working properties:
+          // border
+          // padding
+          // background-color
+          //Todo:Reason is unknown
+          //Other properties (like further font or border attributes) not tested.
+          //If a border or background color around each paper sheet is desired,
+          //assign it to the <body> tag, possibly only for the css of the correct media type.
+
           // Store the style for later...
           if ( is_null($this->_page_style) )
             $this->_page_style = $this->_parse_properties($match[5]);
@@ -807,6 +840,41 @@ class Stylesheet {
     }
   }
 
+  /* See also style.cls Style::_image(), refactoring?, works also for imported css files */
+  protected function _image($val) {
+    $DEBUGCSS=DEBUGCSS;
+    
+    if ( mb_strpos($val, "url") === false ) {
+      $path = "none"; //Don't resolve no image -> otherwise would prefix path and no longer recognize as none
+    }
+    else {
+      $val = preg_replace("/url\(['\"]?([^'\")]+)['\"]?\)/","\\1", trim($val));
+
+      // Resolve the url now in the context of the current stylesheet
+      $parsed_url = explode_url($val);
+      if ( $parsed_url["protocol"] == "" && $this->get_protocol() == "" ) {
+        if ($parsed_url["path"]{0} == '/' || $parsed_url["path"]{0} == '\\' ) {
+          $path = $_SERVER["DOCUMENT_ROOT"].'/';
+        } else {
+          $path = $this->get_base_path();
+        }
+        $path .= $parsed_url["path"] . $parsed_url["file"];
+        $path = dompdf_realpath($path);
+      } else {
+        $path = build_url($this->get_protocol(),
+                          $this->get_host(),
+                          $this->get_base_path(),
+                          $val);
+      }
+    }
+    if ($DEBUGCSS) {
+      print "<pre>[_image\n";
+      print_r($parsed_url);
+      print $this->get_protocol()."\n".$this->get_base_path()."\n".$path."\n";
+      print "_image]</pre>";;
+    }
+    return $path;
+  }
 
   /**
    * parse @import{} sections
@@ -814,34 +882,46 @@ class Stylesheet {
    * @param string $url  the url of the imported CSS file
    */
   private function _parse_import($url) {
-    $arr = preg_split("/[\s\n]/", $url);
-    $url = array_pop($arr);
+    $arr = preg_split("/[\s\n,]/", $url,-1, PREG_SPLIT_NO_EMPTY);
+    $url = array_shift($arr);
     $accept = false;
 
     if ( count($arr) > 0 ) {
 
+      $acceptedmedia = self::$ACCEPTED_GENERIC_MEDIA_TYPES;
+      if ( defined("DOMPDF_DEFAULT_MEDIA_TYPE") ) {
+        $acceptedmedia[] = DOMPDF_DEFAULT_MEDIA_TYPE;
+      } else {
+        $acceptedmedia[] = self::$ACCEPTED_DEFAULT_MEDIA_TYPE; 
+      }
+              
       // @import url media_type [media_type...]
       foreach ( $arr as $type ) {
-        if ( in_array($type, self::$ACCEPTED_MEDIA_TYPES) ) {
+        if ( in_array(mb_strtolower(trim($type)), $acceptedmedia) ) {
           $accept = true;
           break;
         }
       }
 
-    } else
+    } else {
       // unconditional import
       $accept = true;
+    }
 
     if ( $accept ) {
-      $url = str_replace(array('"',"url", "(", ")"), "", $url);
       // Store our current base url properties in case the new url is elsewhere
       $protocol = $this->_protocol;
       $host = $this->_base_host;
       $path = $this->_base_path;
-
+      
+      // $url = str_replace(array('"',"url", "(", ")"), "", $url);
       // If the protocol is php, assume that we will import using file://
-      $url = build_url($protocol == "php://" ? "file://" : $protocol, $host, $path, $url);
-
+      // $url = build_url($protocol == "php://" ? "file://" : $protocol, $host, $path, $url);
+      // Above does not work for subfolders and absolute urls.
+      // Todo: As above, do we need to replace php or file to an empty protocol for local files?
+      
+      $url = $this->_image($url);      
+      
       $this->load_css_file($url);
 
       // Restore the current base url
