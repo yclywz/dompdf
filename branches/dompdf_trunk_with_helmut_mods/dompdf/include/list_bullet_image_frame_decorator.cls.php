@@ -114,7 +114,8 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
    */
   function get_width() {
     //ignore image width, use same width as on predefined bullet List_Bullet_Frame_Decorator
-    //for proper alignment of text. Allow image to not fitting on left border. 
+    //for proper alignment of bullet image and text. Allow image to not fitting on left border.
+    //This controls the distance between bullet image and text 
     //return $this->_width;
     return $this->_frame->get_style()->get_font_size()*List_Bullet_Frame_Decorator::BULLET_SIZE + 
       2 * List_Bullet_Frame_Decorator::BULLET_PADDING;
@@ -131,20 +132,29 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
   }
   
   /**
-   * Override get_margin_width()
+   * Override get_margin_width
    *
    * @return int
    */
   function get_margin_width() {
     //ignore image width, use same width as on predefined bullet List_Bullet_Frame_Decorator
-    //for proper alignment of text. Allow image to not fitting on left border. 
-    //return $this->_width + List_Bullet_Frame_Decorator::BULLET_PADDING;
+    //for proper alignment of bullet image and text. Allow image to not fitting on left border.
+    //This controls the extra indentation of text to make room for the bullet image.
+    //Here use actual image size, not predefined bullet size 
+    //return $this->_frame->get_style()->get_font_size()*List_Bullet_Frame_Decorator::BULLET_SIZE + 
+    //  2 * List_Bullet_Frame_Decorator::BULLET_PADDING;
 
     // Small hack to prevent indenting of list text
-    if ( $this->_frame->get_style()->list_style_position == "outside" )
+    // Image Might not exist, then position like on list_bullet_frame_decorator fallback to none. 
+    if ( $this->_frame->get_style()->list_style_position == "outside" ||
+         $this->_width == 0) 
       return 0;
-    return $this->_frame->get_style()->get_font_size()*List_Bullet_Frame_Decorator::BULLET_SIZE + 
-      2 * List_Bullet_Frame_Decorator::BULLET_PADDING;
+    //This aligns the "inside" image position with the text.
+    //The text starts to the right of the image.
+    //Between the image and the text there is an added margin of image width.
+    //Where this comes from is unknown.
+    //The corresponding List_Bullet_Frame_Decorator sets a smaller margin. bullet size?
+    return $this->_width + 2 * List_Bullet_Frame_Decorator::BULLET_PADDING;
   }
 
   /**
@@ -153,6 +163,7 @@ class List_Bullet_Image_Frame_Decorator extends Frame_Decorator {
    * @return int
    */
   function get_margin_height() {
+    //Hits only on "inset" lists items, to increase height of box
     //based on image height
     return $this->_height + 2 * List_Bullet_Frame_Decorator::BULLET_PADDING;
   }
