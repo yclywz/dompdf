@@ -1775,14 +1775,20 @@ class Style {
     $arr = explode(" ", $border_spec);
 
     // FIXME: handle partial values
+ 
+    //For consistency of individal and combined properties, and with ie8 and firefox3
+    //reset all attributes, even if only partially given   
+    $this->_set_style_side_type('border',$side,'_style',self::$_defaults['border_'.$side.'_style'],$important);
+    $this->_set_style_side_type('border',$side,'_width',self::$_defaults['border_'.$side.'_width'],$important);
+    $this->_set_style_side_type('border',$side,'_color',self::$_defaults['border_'.$side.'_color'],$important);
 
     foreach ($arr as $value) {
       $value = trim($value);
       if ( in_array($value, self::$BORDER_STYLES) ) {
         $this->_set_style_side_type('border',$side,'_style',$value,$important);
 
-      } else if ( preg_match("/[.0-9]+(?:px|pt|pc|em|ex|%|in|mm|cm)|(?:none|normal|thin|medium|thick)/", $value ) ) {
-        $this->_set_style_side_type('border',$side,'_width',str_replace("none", "0px", $value),$important);
+      } else if ( preg_match("/[.0-9]+(?:px|pt|pc|em|ex|%|in|mm|cm)|(?:thin|medium|thick)/", $value ) ) {
+        $this->_set_style_side_type('border',$side,'_width',$value,$important);
 
       } else {
         // must be colour
