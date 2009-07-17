@@ -131,47 +131,34 @@ if (!defined('DOMPDF_TEMP_DIR')) {
  * dompdf's "chroot": Prevents dompdf from accessing system files or other
  * files on the webserver.  All local files opened by dompdf must be in a
  * subdirectory of this directory.  DO NOT set it to '/' since this could
- * allow an attacker to use dompdf to read any files on the server.  This
+ * allow an attacker to use dompdf to read any files on the server. This
  * should be an absolute path.
- * This is only checked on command line call by dompdf.php, but not by
- * direct class use like:
- * $dompdf = new DOMPDF();	$dompdf->load_html($htmldata); $dompdf->render(); $pdfdata = $dompdf->output();
+ * This is checked when DOMPDF is executed using the command line or when 
+ * using $dompdf->load_html_file().
  */
 if (!defined("DOMPDF_CHROOT")) {
   define("DOMPDF_CHROOT", realpath(DOMPDF_DIR));
 }
 
 /**
- * Whether to use Unicode fonts or not.
- *
- * When set to true the PDF backend must be set to "CPDF" and fonts must be
- * loaded via the modified ttf2ufm tool included with dompdf (see below).
- * Unicode font metric files (with .ufm extensions) must be created with
- * ttf2ufm.  load_font.php should do this for you if the TTF2AFM define below
- * points to the modified ttf2ufm tool included with dompdf.
- *
- * When enabled, dompdf can support all Unicode glyphs.  Any glyphs used in a
- * document must be present in your fonts, however.
- *
- */
-if (!defined("DOMPDF_UNICODE_ENABLED")) {
-  define("DOMPDF_UNICODE_ENABLED", false);
-}
-
-/**
- * The path to the tt2pt1 utility (used to convert ttf to afm)
+ * The path to the ttf2pt1 utility (used to convert ttf to afm)
+ * DOMPDF now includes a modified version of this program, ttf2ufm.
+ * If you do not have ttf2pt1 installed on your system you can 
+ * try the version included with DOMPDF.
  *
  * Not strictly necessary, but useful if you would like to install 
  * additional fonts using the {@link load_font.php} utility.
- *
- * Windows users should use something like this:
- * define("TTF2AFM", "C:\\Program Files\\Ttf2Pt1\\bin\\ttf2pt1.exe");
- *
+ * 
+ * Windows users can try:
+ * define("TTF2AFM", DOMPDF_LIB_DIR ."/ttf2ufm/ttf2ufm.exe");
+ * 
+ * *nux users can try the bundled binary (not recommended)
+ * define("TTF2AFM", DOMPDF_LIB_DIR ."/ttf2ufm/ttf2ufm-src/ttf2ufm");
+ * 
  * @link http://ttf2pt1.sourceforge.net/
  */
 if (!defined("TTF2AFM")) {
-  define("TTF2AFM", DOMPDF_LIB_DIR ."/ttf2ufm/ttf2ufm-src/ttf2pt1");
-  //define("TTF2AFM", "/usr/bin/ttf2pt1");
+  define("TTF2AFM", DOMPDF_LIB_DIR ."/ttf2ufm/ttf2ufm-src/ttf2ufm");
 }
 
 /**

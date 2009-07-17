@@ -215,7 +215,7 @@ class CPDF_Adapter implements Canvas {
       $size[2] = $a;
     }
     
-    $this->_pdf = new Cpdf($size, DOMPDF_UNICODE_ENABLED, DOMPDF_FONT_CACHE, DOMPDF_TEMP_DIR);
+    $this->_pdf = new Cpdf($size, false, DOMPDF_FONT_CACHE, DOMPDF_TEMP_DIR);
     $this->_pdf->addInfo("Creator", "dompdf");
 
     // Silence pedantic warnings about missing TZ settings
