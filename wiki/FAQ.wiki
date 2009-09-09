@@ -134,6 +134,7 @@ if ( isset($pdf) ) {
   // Add the object to every page. You can
   // also specify "odd" or "even"
   $pdf->add_object($footer, "all");
+}
 
 </script>
 }}}
