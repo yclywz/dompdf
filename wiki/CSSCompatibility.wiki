@@ -69,7 +69,7 @@ dompdf supports the majority of CSS 2.1 properties. Some notable properties are 
 ||line-height 	||yes||
 ||list-style-image 	||yes||
 ||list-style-position ||	yes||
-||list-style-type 	||no||
+||list-style-type 	||partial||
 ||list-style ||	yes||
 ||margin-right ||	yes||
 ||margin-top ||	yes||
