@@ -1,7 +1,7 @@
 #labels Featured,Phase-Implementation
  * [#Usage Usage]
-   * [#Invoking_via_the_web Invoking via the web]
-   * [#Invoking_via_the_command_line Invoking via the command line]
+   * [#Invoking_dompdf_via_the_web Invoking dompdf via the web]
+   * [#Invoking_dompdf_via_the_command_line Invoking dompdf via the command line]
    * [#Using_the_dompdf_class_directly Using the dompdf class directly]
    * [#Method_summary dompdf class reference]
  * [#Inline_PHP_support Inline PHP support]
@@ -108,11 +108,11 @@ $dompdf->stream("sample.pdf");
 
 Below is a summary of the methods available in the dompdf class. For complete details, see the API documentation for the class interface definition.
 
-== Method Summary ==
+== Method summary ==
 
 (Coming soon)
 
-== Inline PHP Support ==
+= Inline PHP Support =
 
 dompdf supports two varieties of inline PHP code. All PHP evaluation is controlled by the `DOMPDF_ENABLE_PHP` configuration option. If it is set to `false`, then no PHP code is executed. Otherwise, PHP is evaluated in two passes:
 
