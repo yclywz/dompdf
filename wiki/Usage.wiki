@@ -112,7 +112,7 @@ Below is a summary of the methods available in the dompdf class. For complete de
 
 (Coming soon)
 
-= Inline PHP Support =
+= Inline PHP support =
 
 dompdf supports two varieties of inline PHP code. All PHP evaluation is controlled by the `DOMPDF_ENABLE_PHP` configuration option. If it is set to `false`, then no PHP code is executed. Otherwise, PHP is evaluated in two passes:
 
