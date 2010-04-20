@@ -1,0 +1,7 @@
+#summary A list of developer resources about Unicode support
+#labels Phase-Implementation
+
+ * [http://www.joelonsoftware.com/articles/Unicode.html The Absolute Minimum Every Software Developer Absolutely, Positively Must Know About Unicode and Character Sets (No Excuses!)] ([http://www.joelonsoftware.com/navLinks/OtherLanguages.html this article in other languages])
+ * [http://acko.net/node/56 UFPDF: Unicode/UTF-8 extension for FPDF (with a modified version ttf2pt1)]
+ * [http://tcpdf.git.sourceforge.net/git/gitweb.cgi?p=tcpdf/tcpdf;a=tree The TCPDF source code]
+ * http://www.prodevtips.com/2007/10/22/how-to-write-a-pdf-from-php-with-a-custom-font-and-encoding/
