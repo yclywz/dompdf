@@ -76,7 +76,7 @@ Note that typically `dompdf->stream()` and `dompdf->output()` are mutually exclu
 
         if ( isset($pdf) ) {
 
-          $font = Font_Metrics::get_font("verdana", "bold");
+          $font = Font_Metrics::get_font("helvetica", "bold");
 }}}
 
  Use the CPDF_Adapter::page_text() method to set text that will be displayed on every page:
@@ -86,7 +86,7 @@ Note that typically `dompdf->stream()` and `dompdf->output()` are mutually exclu
 
         if ( isset($pdf) ) {
 
-          $font = Font_Metrics::get_font("verdana", "bold");
+          $font = Font_Metrics::get_font("helvetica", "bold");
           $pdf->page_text(72, 18, "Header: {PAGE_NUM} of {PAGE_COUNT}", $font, 6, array(0,0,0));
 
         }
@@ -95,7 +95,7 @@ Note that typically `dompdf->stream()` and `dompdf->output()` are mutually exclu
  
  In this example, the text will be displayed 72pt (1 in) from the left edge of the page and 18pt (1/4 in) from the top of the page, in 6pt font. {PAGE_NUM} and {PAGE_COUNT} are automatically replaced by dompdf to the appropriate values on each page. The last argument to page_text() is the colour which takes an array of the form array(r,g,b) where each of r, g, and b are between 0.0 and 1.0.
 
- There are several other methods available. See the API documentation for the CPDF_Adapter class (http://www.digitaljunkies.ca/dompdf/doc) for more details. Also have a look at the demo_01.html file in the www/test/ directory. It adds a header and footer using PDF_Adapter->page_text(). It also adds text superimposed over the rendered text using a PDF 'object'. This object is added using CPDF_Adapter->add_object(). See [Usage] for more info on inline PHP.
+ There are several other methods available. See the API documentation for the CPDF_Adapter class (http://eclecticgeek.com/dompdf/docs/api/) for more details. Also have a look at the demo_01.html file in the www/test/ directory. It adds a header and footer using PDF_Adapter->page_text(). It also adds text superimposed over the rendered text using a PDF 'object'. This object is added using CPDF_Adapter->add_object(). See [Usage] for more info on inline PHP.
 
 
 *<font color="green">Q:</font> How can I add an image to a header or footer on every page?*<br>
@@ -118,6 +118,7 @@ if ( isset($pdf) ) {
   $pdf->line(16, $y, $w - 16, $y, $color, 1);
 
   // Add an initals box
+  $font = Font_Metrics::get_font("helvetica", "bold");
   $text = "Initials:";
   $width = Font_Metrics::get_text_width($text, $font, $size);
   $pdf->text($w - 16 - $width - 38, $y, $text, $font, $size, $color);
@@ -126,7 +127,7 @@ if ( isset($pdf) ) {
   // Add a logo
   $img_w = 2 * 72; // 2 inches, in points
   $img_h = 1 * 72; // 1 inch, in points -- change these as required
-  $pdf->image("/var/www/images/print_logo.png", ($w - $img_w) / 2.0, $y - $img_h, $img_w, $img_h);
+  $pdf->image("print_logo.png", ($w - $img_w) / 2.0, $y - $img_h, $img_w, $img_h);
 
   // Close the object (stop capture)
   $pdf->close_object();
