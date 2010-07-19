@@ -1,0 +1,23 @@
+#summary A list of the default user agent style sheets
+#labels Phase-Design
+
+An articles about user agent style sheets : http://meiert.com/en/blog/20070922/user-agent-style-sheets/
+
+== Mozilla Firefox ==
+ * [http://mxr.mozilla.org/mozilla-central/source/layout/style/ All]
+
+== Apple WebKit ==
+ * [http://trac.webkit.org/browser/trunk/WebCore/css/ All]
+ * [http://trac.webkit.org/browser/trunk/WebCore/css/html.css html]
+ * [http://trac.webkit.org/browser/trunk/WebCore/css/mathml.css mathml]
+ * [http://trac.webkit.org/browser/trunk/WebCore/css/mediaControls.css mediaControls]
+ * [http://trac.webkit.org/browser/trunk/WebCore/css/quirks.css quirks]
+ * [http://trac.webkit.org/browser/trunk/WebCore/css/svg.css svg]
+ * [http://trac.webkit.org/browser/trunk/WebCore/css/wml.css wml]
+
+== Microsoft Internet Explorer ==
+ * [http://www.iecss.com/ All]
+ * [http://www.iecss.com/ie-6.css Internet Explorer 6]
+ * [http://www.iecss.com/ie-7.css Internet Explorer 7]
+ * [http://www.iecss.com/ie-8.css Internet Explorer 8]
+ * [http://www.iecss.com/ie-9.css Internet Explorer 9]
