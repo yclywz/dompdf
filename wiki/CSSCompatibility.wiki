@@ -4,28 +4,31 @@ dompdf supports the following CSS 2.1 selector syntaxes. dompdf also supports el
 
 || *Selector* || *Supported* ||
 ||`*` || 	yes||
-||E ||	yes||
-||E F ||	yes||
-||E > F ||	yes||
-||E:first-child ||	partial||
-||E:link ||	yes||
-||E:visited ||	N/A||
-||E:active|| 	N/A||
-||E:hover ||	N/A||
-||E:focus ||	N/A||
-||E:lang(c) ||	no||
-||E + F ||	yes||
-||E`[foo]` ||	yes||
-||E[foo="warning"] ||	yes||
-||E[foo~="warning"] ||	yes||
-||E[lang|="en"] ||	yes||
-||E.class ||	yes||
-||E#myid ||	yes||
+||`E` ||	yes||
+||`E F` ||	yes||
+||`E > F` ||	yes||
+||`E:first-child` ||	partial||
+||`E:link` ||	yes||
+||`E:visited` ||	N/A||
+||`E:active`|| 	N/A||
+||`E:hover` ||	N/A||
+||`E:focus` ||	N/A||
+||`E:lang(c)` ||	no||
+||`E + F` ||	yes||
+||`E[foo]` ||	yes||
+||`E[foo="warning"]` ||	yes||
+||`E[foo~="warning"]` ||	yes||
+||`E[foo$="warning"]` ||	yes (CSS3)||
+||`E[foo^="warning"]` ||	yes (CSS3)||
+||`E[foo*="warning"]` ||	yes (CSS3)||
+||`E[lang|="en"]` ||	yes||
+||`E.class` ||	yes||
+||`E#myid` ||	yes||
 
 
 = Properties =
 
-dompdf supports the majority of CSS 2.1 properties. Some notable properties are not supported however. See the following table for details on which properties are supported.
+dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. Some notable properties are not supported however. See the following table for details on which properties are supported.
 
 || *Property* || *Supported* ||
 ||background-attachment 	||N/A||
@@ -78,6 +81,7 @@ dompdf supports the majority of CSS 2.1 properties. Some notable properties are 
 ||max-width 	||yes||
 ||min-height 	||yes||
 ||min-width 	||yes||
+||opacity       ||partial (CSS3)||
 ||orphans 	||yes||
 ||outline-color ||	no||
 ||outline-style 	||no||
@@ -96,18 +100,17 @@ dompdf supports the majority of CSS 2.1 properties. Some notable properties are 
 ||text-align 	||yes||
 ||text-decoration ||	yes||
 ||text-indent 	||yes||
-||text-transform 	||no||
+||text-transform 	||yes||
 ||top ||	no||
-||unicode-bidi ||	no||
-||vertical-align|| 	yes||
+||unicode-bidi ||no||
+||vertical-align||yes||
 ||visibility 	||no||
 ||white-space 	||yes||
-||widows ||	no||
-||width 	||yes||
-||word-spacing 	||yes||
-||z-index 	||no||
-
+||widows        ||no||
+||width         ||yes||
+||word-spacing  ||yes||
+||z-index       ||no||
 
 
  # Display types inline-block and run-in are not supported.
- # Only static positioning is currently supported.
+ # Only static and fixed positioning are currently supported.
