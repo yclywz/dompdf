@@ -27,8 +27,8 @@ dompdf.php accepts the following `$_GET` variables:
 || `paper`       || optional || the paper size. Defaults to 'letter' (unless the default has been changed in dompdf_config.inc.php). See include/pdf_adapter.cls.php, or invoke dompdf.php on the command line with the -l switch for accepted paper sizes. || 
 || `orientation` || optional || 'portrait' or 'landscape'. Defaults to 'portrait'. || 
 || `base_path`   || optional || the base path to use when resolving relative links (images or CSS files). Defaults to the directory containing the file being accessed. (This option is useful for pointing dompdf at your CSS files even though the HTML file may be elsewhere.) || 
-|| `output_file` || optional || the rawurlencoded() name of the output file. Defaults to 'dompdf_out.pdf'. || 
-|| `save_file`   || optional || If present (i.e. `isset($_GET["save_file"])`), output_file is saved locally, Otherwise the file is streamed directly to the client. || 
+|| `output_file` || optional || the rawurlencoded() name of the output file. Defaults to 'dompdf_out.pdf'. <font color="red">Deprecated in 0.6, forced to "dompdf_out.pdf"</font> || 
+|| `save_file`   || optional || If present (i.e. `isset($_GET["save_file"])`), output_file is saved locally, Otherwise the file is streamed directly to the client. <font color="red">Deprecated in 0.6, forced to `false`</font> || 
 
 ----
 
