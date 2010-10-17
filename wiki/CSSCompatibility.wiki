@@ -2,115 +2,123 @@
 
 dompdf supports the following CSS 2.1 selector syntaxes. dompdf also supports elements with multiple class attributes (e.g. `<p class="red bold">foo</p>` matches p.red and p.bold).
 
-|| *Selector* || *Supported* ||
-||`*` || 	yes||
-||`E` ||	yes||
-||`E F` ||	yes||
-||`E > F` ||	yes||
-||`E:first-child` ||	partial||
-||`E:link` ||	yes||
-||`E:visited` ||	N/A||
-||`E:active`|| 	N/A||
-||`E:hover` ||	N/A||
-||`E:focus` ||	N/A||
-||`E:lang(c)` ||	no||
-||`E + F` ||	yes||
-||`E[foo]` ||	yes||
-||`E[foo="warning"]` ||	yes||
-||`E[foo~="warning"]` ||	yes||
-||`E[foo$="warning"]` ||	yes (CSS3)||
-||`E[foo^="warning"]` ||	yes (CSS3)||
-||`E[foo*="warning"]` ||	yes (CSS3)||
-||`E[lang|="en"]` ||	yes||
-||`E.class` ||	yes||
-||`E#myid` ||	yes||
+|| *Selector* || *Supported* || *Notes* ||
+||`*` || 	yes|| ||
+||`E` ||	yes|| ||
+||`E F` ||	yes|| ||
+||`E > F` ||	yes|| ||
+||`E.class` ||	yes|| ||
+||`E#myid` ||	yes|| ||
+||`E:first-child` ||	partial|| ||
+||`E:link` ||	yes|| ||
+||`E:visited` ||	N/A|| ||
+||`E:active`|| 	N/A|| ||
+||`E:hover` ||	N/A|| ||
+||`E:focus` ||	N/A|| ||
+||`E:lang(c)` ||	no|| ||
+||`E + F` ||	yes|| ||
+||`E[foo]` ||	yes|| ||
+||`E[foo="warning"]` ||	yes|| ||
+||`E[foo~="warning"]` ||	yes|| ||
+||`E[foo$="warning"]` ||	yes|| CSS3 ||
+||`E[foo^="warning"]` ||	yes|| CSS3 ||
+||`E[foo*="warning"]` ||	yes|| CSS3 ||
+||`E[lang|="en"]` ||	yes|| ||
 
+= Pseudo elements =
+
+|| *Property* || *Supported* || *Notes* ||
+||`E:before`|| 	yes|| Only on block and inline elements ||
+||`E:after` ||	yes|| Only on block and inline elements ||
 
 = Properties =
 
 dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. Some notable properties are not supported however. See the following table for details on which properties are supported.
 
-|| *Property* || *Supported* ||
-||background-attachment 	||N/A||
-||background-color 	||yes||
-||background-image 	||yes||
-||background-position 	||yes||
-||background-repeat 	||yes||
-||background 	||yes||
-||border-collapse ||	yes||
-||border-color 	||yes||
-||border-spacing 	||yes||
-||border-style 	||yes||
-||border-top 	||yes||
-||border-top-color ||	yes||
-||border-top-style ||	yes||
-||border-top-width ||	yes||
-||border-width 	||yes||
-||border 	||yes||
-||bottom 	||no||
-||caption-side 	||no||
-||clear 	||no||
-||clip 	||no||
-||color|| 	yes||
-||content|| 	partial||
-||counter-increment|| 	partial||
-||counter-reset ||	partial||
-||cursor ||	N/A||
-||direction|| 	no||
-||display 	||partial||
-||empty-cells 	||no||
-||float 	||no||
-||font-family 	||yes||
-||font-size 	||yes||
-||font-style 	||yes||
-||font-variant 	||no||
-||font-weight 	||yes||
-||font 	||yes||
-||height 	||yes||
-||left 	||no||
-||letter-spacing ||	no||
-||line-height 	||yes||
-||list-style-image 	||yes||
-||list-style-position ||	yes||
-||list-style-type 	||partial||
-||list-style ||	yes||
-||margin-right ||	yes||
-||margin-top ||	yes||
-||margin 	||yes||
-||max-height ||	yes||
-||max-width 	||yes||
-||min-height 	||yes||
-||min-width 	||yes||
-||opacity       ||partial (CSS3)||
-||orphans 	||yes||
-||outline-color ||	no||
-||outline-style 	||no||
-||outline-width 	||no||
-||outline 	||no||
-||overflow 	||partial||
-||padding-top 	||yes||
-||padding 	||yes||
-||page-break-after ||	yes||
-||page-break-before ||	yes||
-||page-break-inside ||	yes||
-||position 	||partial||
-||quotes 	||no||
-||right 	||no||
-||table-layout 	||no||
-||text-align 	||yes||
-||text-decoration ||	yes||
-||text-indent 	||yes||
-||text-transform 	||yes||
-||top ||	no||
-||unicode-bidi ||no||
-||vertical-align||yes||
-||visibility 	||no||
-||white-space 	||yes||
-||widows        ||no||
-||width         ||yes||
-||word-spacing  ||yes||
-||z-index       ||no||
+|| *Property* || *Supported* || *Notes* ||
+||background-attachment 	||N/A|| ||
+||background-color 	||yes|| ||
+||background-image 	||yes|| ||
+||background-position 	||yes|| ||
+||background-repeat 	||yes|| ||
+||background 	||yes|| ||
+||border-collapse ||	yes|| ||
+||border-color 	||yes|| ||
+||border-spacing 	||yes|| ||
+||border-style 	||yes|| ||
+||border-top 	||yes|| ||
+||border-top-color ||	yes|| ||
+||border-top-style ||	yes|| ||
+||border-top-width ||	yes|| ||
+||border-width 	||yes|| ||
+||border 	||yes|| ||
+||bottom 	||no|| ||
+||caption-side 	||no|| ||
+||clear 	||no|| ||
+||clip 	||no|| ||
+||color|| 	yes|| ||
+||content|| 	partial|| only raw text, counter(page) and attr() ||
+||counter-increment|| 	partial|| ||
+||counter-reset ||	partial|| ||
+||cursor ||	N/A|| ||
+||direction|| 	no|| ||
+||display 	||partial|| ||
+||empty-cells 	||no|| ||
+||float 	||partial|| ||
+||font-family 	||yes|| ||
+||font-size 	||yes|| ||
+||font-style 	||yes|| ||
+||font-variant 	||no|| ||
+||font-weight 	||yes|| ||
+||font 	||yes|| ||
+||height 	||yes|| ||
+||left 	||yes|| ||
+||letter-spacing ||	no|| ||
+||line-height 	||yes|| ||
+||list-style-image 	||yes|| ||
+||list-style-position ||	yes|| ||
+||list-style-type 	||yes|| ||
+||list-style ||	yes|| ||
+||margin-right ||	yes|| ||
+||margin-top ||	yes|| ||
+||margin 	||yes|| ||
+||max-height ||	yes|| ||
+||max-width 	||yes|| ||
+||min-height 	||yes|| ||
+||min-width 	||yes|| ||
+||opacity       ||partial|| CSS3 ||
+||orphans 	||yes|| ||
+||outline-color ||	yes|| ||
+||outline-style 	||yes|| ||
+||outline-width 	||yes|| ||
+||outline 	||yes|| ||
+||overflow 	||partial|| ||
+||padding-top 	||yes|| ||
+||padding 	||yes|| ||
+||page-break-after ||	yes|| ||
+||page-break-before ||	yes|| ||
+||page-break-inside ||	yes|| ||
+||position 	||partial|| ||
+||quotes 	||yes|| ||
+||right 	||no|| ||
+||sise 	||yes|| for @page ||
+||src 	||no|| for @font-face ||
+||table-layout 	||no|| ||
+||text-align 	||yes|| ||
+||text-decoration ||	yes|| ||
+||text-indent 	||yes|| ||
+||text-transform 	||yes|| ||
+||top ||	no|| ||
+||unicode-bidi ||no|| ||
+||unicode-range ||no|| for @font-face ||
+||vertical-align||yes|| ||
+||visibility 	||no|| ||
+||white-space 	||yes|| ||
+||widows        ||no|| ||
+||width         ||yes|| ||
+||word-spacing  ||yes|| ||
+||z-index       ||no|| ||
 
 
  # Display types inline-block and run-in are not supported.
- # Only static and fixed positioning are currently supported.
+ # Only static, fixed and absolute positioning are currently supported.
