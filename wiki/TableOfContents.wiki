@@ -4,14 +4,14 @@
 <b>About dompdf</b><br>
 [Introduction]<br>
 [Features]<br>
-[CSSCompatibility CSS 2.1 Compatibility]<br>
+[CSSCompatibility CSS Compatibility]<br>
 <br>
 <b>Documentation</b><br>
 [Installation]<br>
 [Usage]<br>
 
 <b>Examples</b><br>
-Coming Soon.<br>
+[http://pxd.me/dompdf/www/examples.php#samples Samples]<br>
 <br>
 <b>Support</b><br>
 [FAQ]<br>
