@@ -127,7 +127,7 @@ if ( isset($pdf) ) {
   // Add a logo
   $img_w = 2 * 72; // 2 inches, in points
   $img_h = 1 * 72; // 1 inch, in points -- change these as required
-  $pdf->image("print_logo.png", ($w - $img_w) / 2.0, $y - $img_h, $img_w, $img_h);
+  $pdf->image("print_logo.png", "png", ($w - $img_w) / 2.0, $y - $img_h, $img_w, $img_h);
 
   // Close the object (stop capture)
   $pdf->close_object();
