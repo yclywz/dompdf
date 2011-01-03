@@ -2,18 +2,14 @@
   * Get dompdf
     * [http://code.google.com/p/dompdf/downloads/list Download]
     * [http://code.google.com/p/dompdf/source/checkout Latest source code]
-
   * About dompdf
     * [Features]
     * [CSSCompatibility CSS Compatibility]
-
   * Documentation
     * [Installation]
     * [Usage]
-
   * Examples
     * [http://pxd.me/dompdf/www/examples.php#samples Samples (SVN trunk)]
-
   * Support
     * [FAQ]
     * [http://groups.google.com/group/dompdf Discussion Group]
