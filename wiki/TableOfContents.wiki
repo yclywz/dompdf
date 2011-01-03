@@ -1,16 +1,20 @@
-<b>Get dompdf</b>
-  * [http://code.google.com/p/dompdf/downloads/list Download]
-  * [http://code.google.com/p/dompdf/source/checkout Latest source code]
-<b>About dompdf</b>
   * [Introduction]
-  * [Features]
-  * [CSSCompatibility CSS Compatibility]
-<b>Documentation</b>
-  * [Installation]
-  * [Usage]
-<b>Examples</b>
-  * [http://pxd.me/dompdf/www/examples.php#samples Samples (SVN trunk)]
-<b>Support</b>
-  * [FAQ]
-  * [http://groups.google.com/group/dompdf Discussion Group]
-  * [http://groups.google.com/group/dompdf-dev Developer Discussion Group]
+  * Get dompdf
+    * [http://code.google.com/p/dompdf/downloads/list Download]
+    * [http://code.google.com/p/dompdf/source/checkout Latest source code]
+
+  * About dompdf
+    * [Features]
+    * [CSSCompatibility CSS Compatibility]
+
+  * Documentation
+    * [Installation]
+    * [Usage]
+
+  * Examples
+    * [http://pxd.me/dompdf/www/examples.php#samples Samples (SVN trunk)]
+
+  * Support
+    * [FAQ]
+    * [http://groups.google.com/group/dompdf Discussion Group]
+    * [http://groups.google.com/group/dompdf-dev Developer Discussion Group]
