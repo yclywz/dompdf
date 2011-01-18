@@ -1,15 +1,88 @@
 #labels Featured,Phase-Implementation
  * [#Usage Usage]
-   * [#Invoking_dompdf_via_the_web Invoking dompdf via the web]
-   * [#Invoking_dompdf_via_the_command_line Invoking dompdf via the command line]
    * [#Using_the_dompdf_class_directly Using the dompdf class directly]
    * [#Method_summary dompdf class reference]
+   * [#Invoking_dompdf_via_the_web Invoking dompdf via the web]
+   * [#Invoking_dompdf_via_the_command_line Invoking dompdf via the command line]
  * [#Inline_PHP_support Inline PHP support]
  
 = Usage =
 
-The dompdf.php script included in the distribution can be used both from the 
-command line or via a web browser. Alternatively, the dompdf class can be used [#Using_the_dompdf_class_directly directly].
+== Using the dompdf class directly ==
+
+Using the dompdf class directly is fairly straightforward:
+
+{{{
+<?php
+require_once("dompdf_config.inc.php");
+
+$html =
+  '<html><body>'.
+  '<p>Put your html here, or generate it with your favourite '.
+  'templating system.</p>'.
+  '</body></html>';
+
+$dompdf = new DOMPDF();
+$dompdf->load_html($html);
+$dompdf->render();
+$dompdf->stream("sample.pdf");
+
+?>
+}}}
+
+Below is a summary of the methods available in the dompdf class.
+
+== Method summary ==
+
+The methods available in the instances of the DOMPDF class are :
+
+=== load_html ===
+ Loads an HTML string. Parse errors are stored in the global array `$_dompdf_warnings`.
+
+ Arguments: 
+  * `string $str`: HTML text to load
+  * `string[optional] $encoding`: encoding, if not provided, dompdf will try to find it.
+
+=== load_html_file ===
+ Loads an HTML file. Parse errors are stored in the global array `$_dompdf_warnings`.
+
+ Arguments:
+  * `string $file`: a filename or url to load
+
+=== output ===
+ Returns the PDF as a string. The file will open a download dialog by default. The options parameter controls the output.
+
+ Arguments:
+  * `array $options`: accepted options are:
+    * _compress_ => 1 or 0 - apply content stream compression, this is on (1) by default
+
+=== render ===
+ Renders the HTML to PDF.
+
+ Arguments: _none_.
+
+=== set_base_path ===
+ Sets the base path, used for external stylesheets and images.
+
+ Arguments:
+  * `string $path`: The base path to be used when resolving external resources URLs.
+
+=== set_paper ===
+ Sets the paper size & orientation
+
+ Arguments:
+  * `string|array $size`: 'letter', 'legal', 'A4', etc. See [http://www.google.com/codesearch/p?hl=en#KbP50B5TJDs/trunk/dompdf/include/cpdf_adapter.cls.php&q=CPDF_Adapter&d=3&l=82 CPDF_Adapter::$PAPER_SIZES]
+  * `string $orientation`: 'portrait' or 'landscape'
+
+=== stream  ===
+ Streams the PDF to the client. The file will open a download dialog by default. The options parameter controls the output. 
+
+ Arguments: 
+  * `string $filename`: the name of the streamed file
+  * `array $options`: accepted options are:
+    * 'compress' = > 1 or 0 - apply content stream compression, this is on (1) by default
+    * 'Attachment' => 1 or 0 - if 1, force the browser to open a download dialog, on (1) by default
+
 
 == Invoking dompdf via the web ==
 
@@ -83,34 +156,6 @@ $ php -f dompdf.php -- my_resume.html
 $ ./dompdf.php -b /var/www/ ./web_stuff/index.html
 $ echo '<html><body>Hello world!</body></html>' | ./dompdf.php -
 }}}
-
-== Using the dompdf class directly ==
-
-Using the dompdf class directly is fairly straightforward:
-
-{{{
-<?php
-require_once("dompdf_config.inc.php");
-
-$html =
-  '<html><body>'.
-  '<p>Put your html here, or generate it with your favourite '.
-  'templating system.</p>'.
-  '</body></html>';
-
-$dompdf = new DOMPDF();
-$dompdf->load_html($html);
-$dompdf->render();
-$dompdf->stream("sample.pdf");
-
-?>
-}}}
-
-Below is a summary of the methods available in the dompdf class. For complete details, see the API documentation for the class interface definition.
-
-== Method summary ==
-
-(Coming soon)
 
 = Inline PHP support =
 
