@@ -50,7 +50,7 @@
   * Addresses warning/errors caused by unrecognized CSS rules or selectors
 
 
-For a full list of modifications since DOMPDF 0.6.0 beta 1 see the [http://code.google.com/p/dompdf/source/list?num=143&start=363 repository changelog]
+For a full list of modifications since DOMPDF 0.6.0 beta 1 see the [http://code.google.com/p/dompdf/source/list?path=/tags/dompdf_0-6-0_beta2&num=104 repository changelog]
 
  == Known Issues ==
 
