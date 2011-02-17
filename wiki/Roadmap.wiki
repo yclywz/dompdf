@@ -1,0 +1,10 @@
+#summary This document outlines the development roadmap for the DOMPDF 0.6 code base
+
+= DOMPDF 0.6 Development Roadmap =
+
+ * Improve table layout
+ * Improve Unicode support
+ * Improve page breaking inside all elements
+ * Add Unicode font packs (possibly with an auto-installer)
+ * Add support for CSS float
+ * Reduce memory usage and rendering time
