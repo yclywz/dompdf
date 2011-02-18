@@ -1,4 +1,5 @@
 #summary This document outlines the development roadmap for the DOMPDF 0.6 code base
+#labels Featured
 
 = DOMPDF 0.6 Development Roadmap =
 
