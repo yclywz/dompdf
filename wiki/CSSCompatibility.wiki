@@ -84,7 +84,7 @@ dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. So
 ||margin 	||yes|| ||
 ||max-height ||	yes|| ||
 ||max-width 	||yes|| ||
-||min-height 	||yes|| ||
+||min-height 	||no|| ||
 ||min-width 	||yes|| ||
 ||opacity       ||partial|| CSS3 ||
 ||orphans 	||yes|| ||
