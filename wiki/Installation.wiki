@@ -1,13 +1,15 @@
 #labels Featured,Phase-Deploy
 =Requirements=
- * PHP 5.0.0+ with the DOM extension enabled. Note that the domxml PECL extenstion conflicts with the DOM extension and must be disabled.
- * Some fonts. PDFs internally support Helvetica, Times-Roman, Courier & Zapf-Dingbats, but if you wish to use other fonts you will need to install some fonts. dompdf supports the same fonts as the underlying PDF backends: Type 1 (.pfb with the corresponding .afm) and !TrueType (.ttf). At the minimum, you should probably have the Microsoft core fonts (now available at: http://corefonts.sourceforge.net/). See below for font installation instructions.
+
+ * PHP 5.0+ with the DOM extension enabled. Note that the domxml PECL extension conflicts with the DOM extension and must be disabled.
+ * Some fonts. PDFs internally support Helvetica, Times-Roman, Courier & Zapf-Dingbats, but if you wish to use other fonts or Unicode charsets you will need to install some fonts. dompdf supports the same fonts as the underlying PDF backends: Type 1 (.pfb with the corresponding .afm) and !TrueType (.ttf). At the minimum, you should probably have the Microsoft core fonts (now available at: http://corefonts.sourceforge.net/). See below for font installation instructions.
  * ttf2pt1 (available at http://ttf2pt1.sourceforge.net) is required to install new ttf fonts when using the CPDF backend.
 
 =Installation=
+
  # Untar/unzip the source package in a directory accessible by your webserver.
- # Edit dompdf_config.inc.php to fit your installation. If you leave the DOMPDF_PDF_BACKEND setting at 'auto' dompdf will use PDFLib if it is installed, otherwise it will use the bundled R&OS CPDF class.
- # Give your webserver write permission on the path specified in DOMPDF_FONT_DIR (lib/fonts by default). Under `*nix`, ideally you can make the webserver group the owner of this directory and give the directory group write permissions. For example, on Debian systems, apache runs as the www-data user:
+ # Edit `dompdf_config.custom.inc.php` (in version 0.6) or `dompdf_config.custom.inc.php` (version 0.5) to fit your installation. If you leave the DOMPDF_PDF_BACKEND setting at 'auto' dompdf will use the bundled R&OS CPDF class.
+ # Give your webserver write permission on the path specified in DOMPDF_FONT_DIR (lib/fonts by default). Under `*nix`, ideally you can make the webserver group the owner of this directory and give the directory group write permissions. For example, on Debian systems, Apache runs as the www-data user:
 
          `$ chgrp www-data lib/fonts`<br>
          `$ chmod g+w lib/fonts`
@@ -16,7 +18,12 @@ If your user is not a member of the www-data group or you do not have root privi
 
          {{{ $ chmod 1777 lib/fonts }}}
 
+=Configuration tool=
+
+Since 0.6 beta 2, dompdf has a configuration/helper page available at `www/setup.php`. This page will tell you if an extension is missing, and will check if the temp path is writable. It will also tell you what fonts are installed for the CPDF backend (the one used by default).
+
 =Font Installation=
+
 ==Note for all platforms==
 
 PDFs include support by default for Helvetica, Times-Roman, Courier and Zapf-Dingbats. You do not need to install any font files if you wish to use these fonts. This has the advantage of reducing the size of the resulting PDF, because additional fonts must be embedded in the PDF.
