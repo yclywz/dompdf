@@ -2,6 +2,8 @@
 
 dompdf supports the following CSS 2.1 selector syntaxes. dompdf also supports elements with multiple class attributes (e.g. `<p class="red bold">foo</p>` matches p.red and p.bold).
 
+Note that the CSS selectors are *case sensitive* in dompdf (e.g. `.foo` will not match `<div class="FOO">bar</div>`)
+
 || *Selector* || *Supported* || *Notes* ||
 ||`*` || 	yes|| ||
 ||`E` ||	yes|| ||
@@ -98,7 +100,7 @@ dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. So
 ||page-break-after ||	yes|| ||
 ||page-break-before ||	yes|| ||
 ||page-break-inside ||	yes|| ||
-||position 	||partial|| ||
+||position 	||yes|| ||
 ||quotes 	||yes|| ||
 ||right 	||no|| ||
 ||sise 	||yes|| for @page ||
@@ -108,17 +110,16 @@ dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. So
 ||text-decoration ||	yes|| ||
 ||text-indent 	||yes|| ||
 ||text-transform 	||yes|| ||
-||top ||	no|| ||
+||top ||	yes|| ||
 ||unicode-bidi ||no|| ||
 ||unicode-range ||no|| for @font-face ||
 ||vertical-align||yes|| ||
-||visibility 	||no|| ||
+||visibility 	||yes|| ||
 ||white-space 	||yes|| ||
 ||widows        ||no|| ||
 ||width         ||yes|| ||
 ||word-spacing  ||yes|| ||
-||z-index       ||no|| ||
+||z-index       ||yes|| ||
 
 
  # Display types inline-block and run-in are not supported.
- # Only static, fixed and absolute positioning are currently supported.
