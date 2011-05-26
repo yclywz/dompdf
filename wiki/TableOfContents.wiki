@@ -16,3 +16,4 @@
     * [FAQ]
     * [http://groups.google.com/group/dompdf Discussion Group]
     * [http://groups.google.com/group/dompdf-dev Developer Discussion Group]
+    * [CPDFUnicode How-to: Enable Unicode support]
