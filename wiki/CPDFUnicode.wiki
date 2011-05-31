@@ -71,7 +71,7 @@ Find the web-based font prep tool at [http://eclecticgeek.com/dompdf/load_font.p
 
 === Configure DOMPDF for Unicode support ===
 
-For DOMPDF to handle your characters correctly you must enable Unicode support in your configuration. Edit dompdf_config.inc.php or dompdf_config.custom.inc.php so that `DOMPDF_ENABLE_UNICODE` is `true`. Without enabling this setting your text will be re-encoded to Windows ANSI when inserted into the PDF and any characters that fall outside this encoding will be converted to question marks.
+For DOMPDF to handle your characters correctly you must enable Unicode support in your configuration. Edit dompdf_config.inc.php or dompdf_config.custom.inc.php so that `DOMPDF_UNICODE_ENABLED` is `true`. Without enabling this setting your text will be re-encoded to Windows ANSI when inserted into the PDF and any characters that fall outside this encoding will be converted to question marks.
 
 === Create a compatible HTML document ===
 
