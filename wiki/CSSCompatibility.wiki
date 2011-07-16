@@ -75,7 +75,7 @@ dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. So
 ||font 	||yes|| ||
 ||height 	||yes|| ||
 ||left 	||yes|| ||
-||letter-spacing ||	no|| ||
+||letter-spacing ||	yes|| ||
 ||line-height 	||yes|| ||
 ||list-style-image 	||yes|| ||
 ||list-style-position ||	yes|| ||
@@ -103,13 +103,14 @@ dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. So
 ||position 	||yes|| ||
 ||quotes 	||yes|| ||
 ||right 	||no|| ||
-||sise 	||yes|| for @page ||
-||src 	||no|| for @font-face ||
+||size 	||yes|| for @page ||
+||src 	||partial|| for @font-face ||
 ||table-layout 	||no|| ||
 ||text-align 	||yes|| ||
 ||text-decoration ||	yes|| ||
 ||text-indent 	||yes|| ||
 ||text-transform 	||yes|| ||
+||transform 	||yes|| CSS3 ||
 ||top ||	yes|| ||
 ||unicode-bidi ||no|| ||
 ||unicode-range ||no|| for @font-face ||
@@ -119,6 +120,7 @@ dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. So
 ||widows        ||no|| ||
 ||width         ||yes|| ||
 ||word-spacing  ||yes|| ||
+||word-wrap 	||yes|| ||
 ||z-index       ||yes|| ||
 
 
