@@ -1,0 +1,21 @@
+#summary HTML5 parser in dompdf
+#labels Phase-Implementation
+
+= Introduction =
+
+Since r431, dompdf has an experimental HTML5 parser : [http://code.google.com/p/html5lib/ html5lib].
+
+
+= What is an HTML5 parser? =
+
+An HTML parser is a library or software able to read an HTML source code and translate it into a [http://www.w3.org/TR/DOM-Level-2-Core/introduction.html DOM tree].
+
+The difference between a regular HTML parser and an HTML5 parser is that the latter knows how to deal with badly structured HTML code as all the cases are strictly defined in [http://www.w3.org/TR/html5/parsing.html W3C specifications].
+
+= What does it mean for dompdf? =
+
+Having an HTML5 parser, dompdf will be able to handle more poorly written HTML documents.
+
+For example, it happens that a `table` element has rows without closing `tr` elements. 
+A regular HTML parser (the one embedded with the PHP DOM extension: libxml) won't be able to handle it well and may, for example, ignore this line or append the next cells to the current line.
+An HTML5 parser will handle it like if the `</tr>` tag is present.
