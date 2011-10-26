@@ -3,7 +3,7 @@
 
 = Introduction =
 
-Since r431, dompdf has an experimental HTML5 parser : [http://code.google.com/p/html5lib/ html5lib]. It can be activated with the SVN trunk be setting `DOMPDF_ENABLE_HTML5PARSER` to `true`.
+Since r431, dompdf has an experimental HTML5 parser (and it got better in r441) : [http://code.google.com/p/html5lib/ html5lib]. It can be activated with the SVN trunk be setting `DOMPDF_ENABLE_HTML5PARSER` to `true`.
 
 
 = What is an HTML5 parser? =
