@@ -1,5 +1,5 @@
 #summary HTML5 parser in dompdf
-#labels Phase-Implementation,Featured
+#labels Phase-Implementation
 
 = Introduction =
 
