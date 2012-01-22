@@ -12,6 +12,13 @@ Note that the CSS selectors are *case sensitive* in dompdf (e.g. `.foo` will not
 ||`E.class` ||	yes|| ||
 ||`E#myid` ||	yes|| ||
 ||`E:first-child` ||	partial|| ||
+||`E:last-child` ||	partial|| Since 0.6 beta 3 ||
+||`E:first-of-type` ||	yes|| Since 0.6 beta 3 ||
+||`E:last-of-type` ||	yes|| Since 0.6 beta 3 ||
+||`E:nth-last-of-type` ||	yes|| Since 0.6 beta 3 ||
+||`E:nth-last-child` ||	yes|| Since 0.6 beta 3 ||
+||`E:nth-of-type` ||	yes|| Since 0.6 beta 3 ||
+||`E:nth-child` ||	yes|| Since 0.6 beta 3 ||
 ||`E:link` ||	yes|| ||
 ||`E:visited` ||	N/A|| ||
 ||`E:active`|| 	N/A|| ||
@@ -22,10 +29,18 @@ Note that the CSS selectors are *case sensitive* in dompdf (e.g. `.foo` will not
 ||`E[foo]` ||	yes|| ||
 ||`E[foo="warning"]` ||	yes|| ||
 ||`E[foo~="warning"]` ||	yes|| ||
-||`E[foo$="warning"]` ||	yes|| CSS3 ||
-||`E[foo^="warning"]` ||	yes|| CSS3 ||
-||`E[foo*="warning"]` ||	yes|| CSS3 ||
+||`E[foo$="warning"]` ||	yes|| Since 0.6 beta 2 ||
+||`E[foo^="warning"]` ||	yes|| Since 0.6 beta 2 ||
+||`E[foo*="warning"]` ||	yes|| Since 0.6 beta 2 ||
 ||`E[lang|="en"]` ||	yes|| ||
+
+= Page selectors = 
+||`@page` ||	yes|| ||
+||`@page :left` ||	yes|| Since 0.6 beta 2, only margins are applied ||
+||`@page :right` ||	yes|| Since 0.6 beta 2, only margins are applied ||
+||`@page :off` ||	yes|| Since 0.6 beta 2, only margins are applied ||
+||`@page :even` ||	yes|| Since 0.6 beta 2, only margins are applied ||
+||`@page :first` ||	yes|| Since 0.6 beta 2, only margins are applied ||
 
 = Pseudo elements =
 
@@ -55,18 +70,18 @@ dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. So
 ||border-width 	||yes|| ||
 ||border 	||yes|| ||
 ||bottom 	||no|| ||
-||caption-side 	||no|| ||
-||clear 	||no|| ||
+||caption-side 	||no. Caption elements are moved before the table, as block elements.|| ||
+||clear 	||partial|| Since 0.6 beta 3 (DOMPDF_ENABLE_CSS_FLOAT must be true)||
 ||clip 	||no|| ||
 ||color|| 	yes|| ||
-||content|| 	partial|| only raw text, counter(page) and attr() ||
-||counter-increment|| 	partial|| ||
-||counter-reset ||	partial|| ||
+||content|| 	yes|| ||
+||counter-increment|| yes|| ||
+||counter-reset || yes|| ||
 ||cursor ||	N/A|| ||
 ||direction|| 	no|| ||
 ||display 	||partial|| ||
-||empty-cells 	||no|| ||
-||float 	||partial|| ||
+||empty-cells 	||yes|| Since 0.6 beta 3 ||
+||float 	||partial|| Since 0.6 beta 3 (DOMPDF_ENABLE_CSS_FLOAT must be true)||
 ||font-family 	||yes|| ||
 ||font-size 	||yes|| ||
 ||font-style 	||yes|| ||
@@ -123,5 +138,32 @@ dompdf supports the majority of CSS 2.1 properties and some CSS 3 properties. So
 ||word-wrap 	||yes|| ||
 ||z-index       ||yes|| ||
 
-
  # Display types inline-block and run-in are not supported.
+
+= CSS Units =
+|| *Unit* || *Supported* || *Notes* ||
+|| `px`   || yes || ||
+|| `pt`   || yes || ||
+|| `%`   || yes || ||
+|| `rem`   || yes || Since 0.6 beta 3 ||
+|| `em`   || yes || ||
+|| `cm`   || yes || ||
+|| `mm`   || yes || ||
+|| `ex`   || yes || Equals to em/2 ||
+|| `in`   || yes || ||
+|| `pc`   || yes || ||
+|| `rad`   || yes || Since 0.6 beta 2, for 2D transforms ||
+|| `deg`   || yes || Since 0.6 beta 2, for 2D transforms ||
+
+= Colors =
+|| *Color* || *Supported* || *Notes* ||
+|| `transparent` || yes || ||
+|| `currentColor` || no || ||
+|| [http://www.w3.org/TR/css3-color/#html4 Basic color keywords] || yes || ||
+|| [http://www.w3.org/TR/css3-color/#svg-color Extended color keywords] || yes || ||
+|| [http://www.w3.org/TR/css3-color/#numerical Numerical color values]  || yes || ||
+|| [http://www.w3.org/TR/css3-gcpm/#cmyk-colors CMYK color values]  || yes || ||
+|| [http://www.w3.org/TR/css3-color/#rgba-color RGBA color values] || no || ||
+|| [http://www.w3.org/TR/css3-color/#hsl-color HSL color values] || no || ||
+|| [http://www.w3.org/TR/css3-color/#hsla-color HSLA color values] || no || ||
+|| [http://www.w3.org/TR/css3-color/#css2-system CSS2 system colors] || no || ||
