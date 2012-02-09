@@ -77,6 +77,7 @@ For a full list of known issues, see the [http://code.google.com/p/dompdf/issues
   * Improve support for CSS float
   * Reduce memory usage
 
+----
 
  = DOMPDF 0.6.0 beta 2 =
 
