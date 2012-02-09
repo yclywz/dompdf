@@ -1,6 +1,83 @@
 #summary The DOMPDF project release notes
 #labels Featured
 
+ = DOMPDF 0.6.0 beta 3 =
+
+ == New Features == 
+
+ === HTML/CSS/Images support ===
+
+  * Limited support for CSS float (disabled by default). See [http://code.google.com/p/dompdf/source/browse/tags/dompdf_0-6-0_beta3/dompdf/dompdf_config.inc.php#301 DOMPDF_ENABLE_CSS_FLOAT] (r407, r408, r415, r438, r457, r459, r471)
+  * Support for nth-child selectors (r407, r419)
+  * Support for @font-face (r407, r413)
+  * Font sub-setting now available (disabled by default). See [http://code.google.com/p/dompdf/source/browse/tags/dompdf_0-6-0_beta3/dompdf/dompdf_config.inc.php#134 DOMPDF_ENABLE_FONTSUBSETTING] (r466, r468, r469)
+  * Added an HTML5 Parser to enable improved document parsing/correction (disabled by default). See [http://code.google.com/p/dompdf/source/browse/tags/dompdf_0-6-0_beta3/dompdf/dompdf_config.inc.php#316 DOMPDF_ENABLE_HTML5PARSER] (r429, r430, r431, r441)
+  * Added support for ID in anchors tags (r373)
+  * Added a message for broken images and updated the broken_image.png file to something less aggressive (r377)
+  * Added support for transparent PNG in background-image and improved background-image handling (r380, r404, r450, r453)
+  * Improved absolute positioning (r387, r409, r459, r460)
+  * Added support for the "rem" CSS unit (r389)
+  * Improved support for the "ex" CSS unit (r390)
+  * When parsing tables, TR elements not contained by TBODY, TFOOT, or THEAD are automatically encapsulated by TBODY (r390)
+  * Added support for the CSS declaration word-wrap: break-word (r391)
+  * Added support for @page :left, :right, :first, :odd, and :even (r393)
+  * Added support for CSS visibility and empty-cells properties (r393)
+  * Type selectors (e.g. h1) are now case insensitive (r417)
+  * Image type detection is now based on file header instead of filename extension (r422)
+  * Added support for HTML5-style charset metatag (`<meta charset=”utf-8”>`) (r430)
+  * Added support for nested CSS counters (r438)
+  * Replaced TTF2UFM with php-font-lib and remove all dependencies on TTF2UFM (r447)
+  * Table columns widths are now consistent across pages (r462)
+  * Added limited support for table captions (r456)
+  * Reduced rendering time by using caches (r469)
+
+ === Installation / configuration / debugging ===
+
+  * Added frame (i.e. discreet document element) count to the sample website debugger output (r399)
+  * DOMPDF_ENABLE_REMOTE is no longer needed for stylesheet references that use a URL with domain component (r407)
+  * Added a ready-to-use web-based font installer to the sample website (www/fonts.php) (r417, r418)
+  * Added the Unicode-compatible [http://dejavu-fonts.org DejaVu Fonts] as part of the base installation (r388)
+
+ === Major bug fixes ===
+
+  * Fixes compatibility with the Symfony framework autoloader (disabled by default). See [http://code.google.com/p/dompdf/source/browse/tags/dompdf_0-6-0_beta3/dompdf/dompdf_config.inc.php#310 DOMPDF_AUTOLOAD_PREPEND] (r374)
+  * Fixes errors in how margins were collapsed between siblings (r375)
+  * Improves the way lines are aligned vertically (see the css_baseline example) (r375)
+  * Corrects the bounding box used for drawing backgrounds (r377)
+  * Fixes the z-index rendering process (r377, r378, r379, r393)
+  * Adds support for color styling inheritance (r390)
+  * Fixes bugs with nested tables and HTML attributes (r393)
+  * Fixes handling of URLs with non-ascii chars in the CPDF adapter (r394)
+  * Fixes a rgb()-style color parsing bug (r402)
+  * Fixes RLE4 compressed bitmap image support (r405)
+  * Fixes bug that caused generated content to occasionally display multiple times (r406)
+  * Improves background image clipping (r417)
+  * Fixes table layout bug caused by zero-height rows (r464)
+  * Fixes layout bug caused by 100% width tables centered with margin auto (r465)
+
+For a full list of modifications since DOMPDF 0.6.0 beta 2 see the changes listed on this page of the [http://code.google.com/p/dompdf/source/list?num=88&start=472&path=/trunk repository changelog].
+
+ === Known Issues ===
+
+  * Table cells cannot be split over multiple pages
+  * CSS float support is not yet perfected
+
+For a full list of known issues, see the [http://code.google.com/p/dompdf/issues/list issue tracker].
+
+ === Installation Notes ===
+
+  * Starting with DOMPDF 0.6.0 the dompdf.php script will no longer allow conversion of HTML document on the local file system that are located outside of the path specified by [http://code.google.com/p/dompdf/source/browse/tags/dompdf_0-6-0_beta3/dompdf/dompdf_config.inc.php#109 DOMPDF_CHROOT]
+  * If you are installing DOMPDF on top of an existing installation you should remove any existing font metrics. This can be done manually or through the sample website (www/fonts.php).
+  * When upgrading to a new version of DOMPDF you must replace dompdf_config.inc.php with the new one. To simplify the upgrade process you can store your configuration settings in dompdf_config.custom.inc.php (which does not need to be overwritten).
+
+ === DOMPDF 0.6 Roadmap ===
+
+  * Improve Unicode support
+  * Improve page breaks inside or outside tables
+  * Improve support for CSS float
+  * Reduce memory usage
+
+
  = DOMPDF 0.6.0 beta 2 =
 
  == New Features == 
