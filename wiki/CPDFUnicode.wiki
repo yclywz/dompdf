@@ -2,6 +2,8 @@
 
 = A guide to enabling Unicode support in DOMPDF (when using the CPDF backend) =
 
+_Note: This document was written with DOMPDF 0.6.0 beta 2 in mind. An update that takes into account new features in 0.6.0 beta 3 will be released in the future._
+
 == What you need to do: ==
 
  * [CPDFUnicode#Install_DOMPDF_0.6.0_or_greater Install DOMPDF 0.6.0 or greater]
