@@ -4,4 +4,4 @@ As the project moved to Github, we don't link directly to the source code on Git
 
  == All is done [https://github.com/dompdf/dompdf on Github] now. ==
 
-But you can still [http://code.google.com/p/dompdf/source/checkout/ checkout the SVN trunk], [http://code.google.com/p/dompdf/source/browse/ browse it] or even [http://code.google.com/p/dompdf/source/list see changes].
+But you can still [http://code.google.com/p/dompdf/source/checkout checkout the SVN trunk], [http://code.google.com/p/dompdf/source/browse/ browse it] or even [http://code.google.com/p/dompdf/source/list see changes].
