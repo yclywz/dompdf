@@ -1,7 +1,7 @@
   * [Introduction]
   * Get dompdf
-    * [http://code.google.com/p/dompdf/downloads/list Download]
-    * [http://code.google.com/p/dompdf/source/checkout Latest source code]
+    * [https://github.com/dompdf/dompdf/downloads Download]
+    * [https://github.com/dompdf/dompdf Latest source code]
   * About dompdf
     * [ReleaseNotes]
     * [Roadmap]
@@ -15,5 +15,4 @@
   * Support
     * [FAQ]
     * [http://groups.google.com/group/dompdf Discussion Group]
-    * [http://groups.google.com/group/dompdf-dev Developer Discussion Group]
     * [CPDFUnicode How-to: Enable Unicode support]
