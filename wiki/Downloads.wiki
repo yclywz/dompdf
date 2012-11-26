@@ -1,0 +1,3 @@
+#summary Downloads moved to Github
+
+Downloads moved to [https://github.com/dompdf/dompdf/downloads Github].
