@@ -1,0 +1,3 @@
+#summary Issues moved to Github
+
+Issues moved to [https://github.com/dompdf/dompdf/issues&state=open Github].
